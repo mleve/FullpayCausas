@@ -159,7 +159,19 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
             showProgress(true);
 
             String response = null;
-            HttpRequestTask mHttpTask = new HttpRequestTask(username,password,this,
+
+            //TODO encode password in sha1
+            String mPassword = "910d7d0bd429f9c101d067fc9c2d995c9e416f54";
+
+            //TODO encode token in base64
+            String token = "UHllWXRUcnB4MkZHZGp5UEFMclBhZEpm";
+            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+            nameValuePairs.add(new BasicNameValuePair("username", username));
+            nameValuePairs.add(new BasicNameValuePair("password", mPassword));
+            nameValuePairs.add(new BasicNameValuePair("token", token));
+
+            HttpRequestTask mHttpTask = new HttpRequestTask(nameValuePairs,
+                    "http://dev.empchile.net/forseti/index.php/admin/api/auth",
                     new HttpRequestTask.OnPostExecuteListener() {
                         @Override
                         public void onPostExecute(String result) {

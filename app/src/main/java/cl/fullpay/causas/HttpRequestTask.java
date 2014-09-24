@@ -31,11 +31,8 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
 
     private final String LOG_TAG = HttpRequestTask.class.getSimpleName();
 
-    private String username;
-    private String mPassword;
-    private Context context;
-    private String responseObj;
-    private String[] response;
+    private String mUrl=null;
+    private ArrayList<NameValuePair> mParams;
 
     private OnPostExecuteListener mPostExecuteListener = null;
 
@@ -43,12 +40,12 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
         void onPostExecute(String result);
     }
 
-    HttpRequestTask(String username, String password, Context context,
+    HttpRequestTask(ArrayList<NameValuePair> params,
+                    String url,
                     OnPostExecuteListener postExecuteListener) {
-        this.username = username;
-        mPassword = password;
-        this.context = context;
+        mParams = params;
         mPostExecuteListener = postExecuteListener;
+        mUrl = url;
     }
 
     @Override
@@ -63,23 +60,14 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
 
         Log.d(LOG_TAG, "iniciando la wea");
 
-        //TODO encode password in sha1
-        mPassword = "910d7d0bd429f9c101d067fc9c2d995c9e416f54";
-
-        //TODO encode token in base64
-        String token = "UHllWXRUcnB4MkZHZGp5UEFMclBhZEpm";
 
         try {
 
             HttpClient httpclient = new DefaultHttpClient();
-            HttpPost httppost = new HttpPost("http://dev.empchile.net/forseti/index.php/admin/api/auth");
+            HttpPost httppost = new HttpPost(mUrl);
 
             // Add your data
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("username", username));
-            nameValuePairs.add(new BasicNameValuePair("password", mPassword));
-            nameValuePairs.add(new BasicNameValuePair("token", token));
-            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            httppost.setEntity(new UrlEncodedFormEntity(mParams));
 
             // Execute HTTP Post Request
             HttpResponse response = httpclient.execute(httppost);
@@ -135,6 +123,6 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onCancelled() {
-       responseObj = null;
+
     }
 }
