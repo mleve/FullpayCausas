@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -18,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,9 +27,25 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import cl.fullpay.causas.R;
 
 /**
  * A login screen that offers login via email/password.
@@ -48,9 +64,9 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
-
+    private final String LOG_TAG = Login.class.getSimpleName();
     // UI references.
-    private AutoCompleteTextView mEmailView;
+    private AutoCompleteTextView mUsernameView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
@@ -61,7 +77,7 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
         setContentView(R.layout.activity_login);
 
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mUsernameView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -104,11 +120,11 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
         }
 
         // Reset errors.
-        mEmailView.setError(null);
+        mUsernameView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
+        String username = mUsernameView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -123,13 +139,13 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
+        if (TextUtils.isEmpty(username)) {
+            mUsernameView.setError(getString(R.string.error_field_required));
+            focusView = mUsernameView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
+        } else if (!isUsernameValid(username)) {
+            mUsernameView.setError(getString(R.string.error_invalid_email));
+            focusView = mUsernameView;
             cancel = true;
         }
 
@@ -141,13 +157,62 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password,this);
-            mAuthTask.execute((Void) null);
+
+            String response = null;
+            HttpRequestTask mHttpTask = new HttpRequestTask(username,password,this,
+                    new HttpRequestTask.OnPostExecuteListener() {
+                        @Override
+                        public void onPostExecute(String result) {
+                            processResponse(result);
+                        }
+                    });
+            mHttpTask.execute((Void) null);
         }
     }
-    private boolean isEmailValid(String email) {
+
+    private void processResponse(String response){
+        mAuthTask = null;
+        showProgress(false);
+
+        String toastMsg = "";
+
+        if (response == null){
+            toastMsg = "Ocurrio un error interno";
+        }
+        else {
+
+            try{
+                JSONObject responseObj = new JSONObject(response);
+                if(responseObj.getInt("response") == 0) {
+                    this.startActivity(new Intent(this, Init.class));
+                    return;
+                }
+                else{
+                    int error = responseObj.getInt("error");
+                    if(error == 10)
+                        toastMsg = "Token invalido";
+                    else if(error == 21){
+                        mPasswordView.setError("Usuario o clave incorrecto");
+                        mPasswordView.requestFocus();
+                        return;
+                    }
+
+
+                }
+            }catch(JSONException e){
+                toastMsg = "Ocurrio un error interno";
+                Log.d(LOG_TAG,"ni idea como llegue aqui: " + e);
+
+            }
+
+        }
+        Toast.makeText(this,toastMsg,Toast.LENGTH_LONG).show();
+    }
+
+
+    private boolean isUsernameValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return true;
     }
 
     private boolean isPasswordValid(String password) {
@@ -242,61 +307,138 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
                 new ArrayAdapter<String>(Login.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
-        mEmailView.setAdapter(adapter);
+        mUsernameView.setAdapter(adapter);
     }
 
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, String> {
 
-        private final String mEmail;
-        private final String mPassword;
+        private final String LOG_TAG = UserLoginTask.class.getSimpleName();
+
+        private String username;
+        private String mPassword;
         private Context context;
 
-        UserLoginTask(String email, String password, Context context) {
-            mEmail = email;
+        UserLoginTask(String username, String password, Context context) {
+            this.username = username;
             mPassword = password;
             this.context = context;
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+        protected String doInBackground(Void... params) {
+
+
+
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            String responseStr = null;
+
+            Log.d(LOG_TAG,"iniciando la wea");
+
+            //TODO encode password in sha1
+            mPassword = "910d7d0bd429f9c101d067fc9c2d995c9e416f54";
+
+            //TODO encode token in base64
+            String token = "UHllWXRUcnB4MkZHZGp5UEFMclBhZEpm";
 
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost("http://dev.empchile.net/forseti/index.php/admin/api/auth");
+
+                // Add your data
+                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+                nameValuePairs.add(new BasicNameValuePair("username", username));
+                nameValuePairs.add(new BasicNameValuePair("password", mPassword));
+                nameValuePairs.add(new BasicNameValuePair("token", token));
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+                // Execute HTTP Post Request
+                HttpResponse response = httpclient.execute(httppost);
+
+
+
+                // Read the input stream into a String
+                InputStream inputStream = response.getEntity().getContent();
+                StringBuffer buffer = new StringBuffer();
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
+                }
+
+                responseStr = buffer.toString();
+
+
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "error", e);
+                responseStr = null;
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
                 }
             }
-            return false;
-            /*
-            // TODO: register the new account here.
-            return true;
-            */
+
+            Log.d(LOG_TAG,"Respuesta: "+responseStr);
+            return responseStr;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final String success) {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
-                context.startActivity(new Intent(context,Init.class));
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+            String toastMsg = "";
+
+            if (success == null){
+                toastMsg = "Ocurrio un error interno";
             }
+            else {
+
+                try{
+                    JSONObject responseObj = new JSONObject(success);
+                    if(responseObj.getInt("response") == 0) {
+                        context.startActivity(new Intent(context, Init.class));
+                        return;
+                    }
+                    else{
+                        int error = responseObj.getInt("error");
+                        if(error == 10)
+                            toastMsg = "Token invalido";
+                        else if(error == 21){
+                            mPasswordView.setError("Usuario o clave incorrecto");
+                            mPasswordView.requestFocus();
+                            return;
+                        }
+
+
+                    }
+                }catch(JSONException e){
+                    toastMsg = "Ocurrio un error interno";
+                    Log.d(LOG_TAG,"ni idea como llegue aqui: " + e);
+
+                }
+
+            }
+            Toast.makeText(context,toastMsg,Toast.LENGTH_LONG).show();
+
         }
 
         @Override
