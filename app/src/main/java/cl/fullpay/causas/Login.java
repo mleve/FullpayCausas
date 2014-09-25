@@ -43,8 +43,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
 
 /**
@@ -63,7 +68,7 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
+    private HttpRequestTask mAuthTask = null;
     private final String LOG_TAG = Login.class.getSimpleName();
     // UI references.
     private AutoCompleteTextView mUsernameView;
@@ -160,17 +165,17 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
 
             String response = null;
 
-            //TODO encode password in sha1
-            String mPassword = "910d7d0bd429f9c101d067fc9c2d995c9e416f54";
+            String mPassword = encryptPassword(password);
 
             //TODO encode token in base64
             String token = "UHllWXRUcnB4MkZHZGp5UEFMclBhZEpm";
+
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             nameValuePairs.add(new BasicNameValuePair("username", username));
             nameValuePairs.add(new BasicNameValuePair("password", mPassword));
             nameValuePairs.add(new BasicNameValuePair("token", token));
 
-            HttpRequestTask mHttpTask = new HttpRequestTask(nameValuePairs,
+            mAuthTask = new HttpRequestTask(nameValuePairs,
                     "http://dev.empchile.net/forseti/index.php/admin/api/auth",
                     new HttpRequestTask.OnPostExecuteListener() {
                         @Override
@@ -178,8 +183,41 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
                             processResponse(result);
                         }
                     });
-            mHttpTask.execute((Void) null);
+            mAuthTask.execute((Void) null);
         }
+    }
+
+    private String encryptPassword(String password)
+    {
+        String sha1 = "";
+        try
+        {
+            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+            crypt.reset();
+            crypt.update(password.getBytes("UTF-8"));
+            sha1 = byteToHex(crypt.digest());
+        }
+        catch(NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+        return sha1;
+    }
+
+    private String byteToHex(final byte[] hash)
+    {
+        Formatter formatter = new Formatter();
+        for (byte b : hash)
+        {
+            formatter.format("%02x", b);
+        }
+        String result = formatter.toString();
+        formatter.close();
+        return result;
     }
 
     private void processResponse(String response){
@@ -223,13 +261,11 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
 
 
     private boolean isUsernameValid(String email) {
-        //TODO: Replace this with your own logic
         return true;
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return true;
     }
 
     /**
@@ -322,143 +358,7 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
         mUsernameView.setAdapter(adapter);
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, String> {
 
-        private final String LOG_TAG = UserLoginTask.class.getSimpleName();
-
-        private String username;
-        private String mPassword;
-        private Context context;
-
-        UserLoginTask(String username, String password, Context context) {
-            this.username = username;
-            mPassword = password;
-            this.context = context;
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-
-
-
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
-            String responseStr = null;
-
-            Log.d(LOG_TAG,"iniciando la wea");
-
-            //TODO encode password in sha1
-            mPassword = "910d7d0bd429f9c101d067fc9c2d995c9e416f54";
-
-            //TODO encode token in base64
-            String token = "UHllWXRUcnB4MkZHZGp5UEFMclBhZEpm";
-
-            try {
-
-                HttpClient httpclient = new DefaultHttpClient();
-                HttpPost httppost = new HttpPost("http://dev.empchile.net/forseti/index.php/admin/api/auth");
-
-                // Add your data
-                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-                nameValuePairs.add(new BasicNameValuePair("username", username));
-                nameValuePairs.add(new BasicNameValuePair("password", mPassword));
-                nameValuePairs.add(new BasicNameValuePair("token", token));
-                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-                // Execute HTTP Post Request
-                HttpResponse response = httpclient.execute(httppost);
-
-
-
-                // Read the input stream into a String
-                InputStream inputStream = response.getEntity().getContent();
-                StringBuffer buffer = new StringBuffer();
-
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
-                }
-
-                responseStr = buffer.toString();
-
-
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "error", e);
-                responseStr = null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-
-            Log.d(LOG_TAG,"Respuesta: "+responseStr);
-            return responseStr;
-        }
-
-        @Override
-        protected void onPostExecute(final String success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            String toastMsg = "";
-
-            if (success == null){
-                toastMsg = "Ocurrio un error interno";
-            }
-            else {
-
-                try{
-                    JSONObject responseObj = new JSONObject(success);
-                    if(responseObj.getInt("response") == 0) {
-                        context.startActivity(new Intent(context, Init.class));
-                        return;
-                    }
-                    else{
-                        int error = responseObj.getInt("error");
-                        if(error == 10)
-                            toastMsg = "Token invalido";
-                        else if(error == 21){
-                            mPasswordView.setError("Usuario o clave incorrecto");
-                            mPasswordView.requestFocus();
-                            return;
-                        }
-
-
-                    }
-                }catch(JSONException e){
-                    toastMsg = "Ocurrio un error interno";
-                    Log.d(LOG_TAG,"ni idea como llegue aqui: " + e);
-
-                }
-
-            }
-            Toast.makeText(context,toastMsg,Toast.LENGTH_LONG).show();
-
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
 }
 
 
