@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_weight="0.2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Rol"
+        android:id="@+id/cause_rol" />
+
+    <TextView
+        android:layout_weight="0.2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Rut"
+        android:id="@+id/cause_rut" />
+
+    <TextView
+        android:layout_weight="0.3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Nombre"
+        android:id="@+id/cause_name" />
+    <TextView
+        android:layout_weight="0.2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Etapa"
+        android:id="@+id/cause_stage" />
+    <TextView
+        android:layout_weight="0.2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Comentario"
+        android:id="@+id/cause_comment" />
+    <TextView
+        android:layout_weight="0.2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Exhorto"
+        android:id="@+id/cause_exhorto" />
+    <TextView
+        android:layout_weight="0.3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Ultimo cambio"
+        android:id="@+id/cause_last_change" />
+</LinearLayout>
