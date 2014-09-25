@@ -2,19 +2,21 @@ package cl.fullpay.causas;
 
 
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
+import cl.fullpay.causas.HttpTasks.HttpGetTask;
 
 
 /**
@@ -23,8 +25,10 @@ import java.util.List;
  */
 public class CauseListFragment extends Fragment {
 
-
+    private final String LOG_TAG = CauseListFragment.class.getSimpleName();
     CauseAdapter adapter;
+    private HttpGetTask getCauseTask;
+
     public CauseListFragment() {
         // Required empty public constructor
     }
@@ -37,6 +41,7 @@ public class CauseListFragment extends Fragment {
 
         ArrayList<Cause> causeList = new ArrayList<Cause>();
 
+        //Dummy content
         Cause cause = new Cause("si","no","siii","no","sii","no","si");
         Cause cause2 = new Cause("si","no","siii","no","sii","no","si");
         Cause cause3= new Cause("si","no","siii","no","sii","no","si");
@@ -44,6 +49,17 @@ public class CauseListFragment extends Fragment {
         causeList.add(cause);
         causeList.add(cause2);
         causeList.add(cause3);
+
+        getCauseTask = new HttpGetTask(null,
+                "http://dev.empchile.net/forseti/index.php/admin/api/getCausas",
+                new HttpGetTask.OnPostExecuteListener() {
+                    @Override
+                    public void onPostExecute(String result) {
+                        updateAdapter(result);
+                    }
+                });
+
+        getCauseTask.execute((Void) null);
 
         adapter = new CauseAdapter(getActivity(),
                 R.layout.cause_list_item,
@@ -68,4 +84,56 @@ public class CauseListFragment extends Fragment {
 
 
     }
+
+    private void updateAdapter(String result) {
+
+        adapter.clear();
+
+        JSONArray causeList = parseResponse(result);
+
+        if(causeList != null){
+            JSONObject aux = null;
+            for(int i=0; i<causeList.length();i++){
+                try{
+                    aux = causeList.getJSONObject(i);
+                }catch (JSONException e){
+                    Log.e(LOG_TAG,"error al intentar leer causa");
+                    continue;
+                }
+
+                try{
+                    adapter.add(new Cause(aux.getString("rol"),
+                            aux.getString("rut"),
+                            aux.getString("nombres"),
+                            aux.getString("id_etapa"),
+                            aux.getString("observaciones"),
+                            aux.getString("exorto"),
+                            aux.getString("fecha_etapa")));
+
+                }catch (JSONException e){
+                    Log.e(LOG_TAG,"error al leer campo de causa");
+                    continue;
+                }
+
+            }
+        }
+
+    }
+
+    private JSONArray parseResponse(String result) {
+        JSONObject responseObj = null;
+        JSONArray array = null;
+        try {
+            responseObj = new JSONObject(result);
+            array = responseObj.getJSONArray("causas");
+
+        }catch(JSONException e){
+            Log.e(LOG_TAG, "cago el parseo del json :(");
+            array = null;
+        }
+
+        return array;
+    }
+
+
 }

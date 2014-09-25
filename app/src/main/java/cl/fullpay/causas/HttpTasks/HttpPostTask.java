@@ -1,10 +1,7 @@
-package cl.fullpay.causas;
+package cl.fullpay.causas.HttpTasks;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -12,9 +9,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,14 +16,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by mario on 24-09-14.
  */
-public class HttpRequestTask extends AsyncTask<Void, Void, String> {
+public class HttpPostTask extends AsyncTask<Void, Void, String> {
 
-    private final String LOG_TAG = HttpRequestTask.class.getSimpleName();
+    private final String LOG_TAG = HttpPostTask.class.getSimpleName();
 
     private String mUrl=null;
     private ArrayList<NameValuePair> mParams;
@@ -40,9 +33,9 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
         void onPostExecute(String result);
     }
 
-    HttpRequestTask(ArrayList<NameValuePair> params,
-                    String url,
-                    OnPostExecuteListener postExecuteListener) {
+    public HttpPostTask(ArrayList<NameValuePair> params,
+                        String url,
+                        OnPostExecuteListener postExecuteListener) {
         mParams = params;
         mPostExecuteListener = postExecuteListener;
         mUrl = url;

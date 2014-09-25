@@ -5,13 +5,11 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -29,28 +27,19 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
+
+import cl.fullpay.causas.HttpTasks.HttpPostTask;
 
 /**
  * A login screen that offers login via email/password.
@@ -68,7 +57,7 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private HttpRequestTask mAuthTask = null;
+    private HttpPostTask mAuthTask = null;
     private final String LOG_TAG = Login.class.getSimpleName();
     // UI references.
     private AutoCompleteTextView mUsernameView;
@@ -175,9 +164,9 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
             nameValuePairs.add(new BasicNameValuePair("password", mPassword));
             nameValuePairs.add(new BasicNameValuePair("token", token));
 
-            mAuthTask = new HttpRequestTask(nameValuePairs,
+            mAuthTask = new HttpPostTask(nameValuePairs,
                     "http://dev.empchile.net/forseti/index.php/admin/api/auth",
-                    new HttpRequestTask.OnPostExecuteListener() {
+                    new HttpPostTask.OnPostExecuteListener() {
                         @Override
                         public void onPostExecute(String result) {
                             processResponse(result);
