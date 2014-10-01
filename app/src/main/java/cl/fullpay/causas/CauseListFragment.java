@@ -36,15 +36,15 @@ public class CauseListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_cause_list, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_cause_list_2, container, false);
 
 
         ArrayList<Cause> causeList = new ArrayList<Cause>();
 
         //Dummy content
-        Cause cause = new Cause("si","no","siii","no","sii","no","si");
-        Cause cause2 = new Cause("si","no","siii","no","sii","no","si");
-        Cause cause3= new Cause("si","no","siii","no","sii","no","si");
+        Cause cause = new Cause("si","no","dummy","siii","no","sii","no","si");
+        Cause cause2 = new Cause("si","no","dummy","siii","no","sii","no","si");
+        Cause cause3= new Cause("si","no","dummy","siii","no","sii","no","si");
 
         causeList.add(cause);
         causeList.add(cause2);
@@ -105,6 +105,7 @@ public class CauseListFragment extends Fragment {
                     adapter.add(new Cause(aux.getString("rol"),
                             aux.getString("rut"),
                             aux.getString("nombres"),
+                            aux.getString("ap_pat"),
                             aux.getString("id_etapa"),
                             aux.getString("observaciones"),
                             aux.getString("exorto"),

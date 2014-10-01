@@ -5,18 +5,28 @@ package cl.fullpay.causas;
  */
 public class Cause {
 
-    private String rol,rut,name,stage,comment,exhorto,date;
+    private String rol,rut,name,last_name, stage,comment,exhorto,date;
 
-    public Cause(String rol, String rut, String name, String stage, String comment, String exhorto, String date) {
+
+
+    public Cause(String rol, String rut, String name, String last_name, String stage, String comment, String exhorto, String date) {
         this.rol = rol;
         this.rut = rut;
         this.name = name;
+        this.last_name = last_name;
         this.stage = stage;
         this.comment = comment;
         this.exhorto = exhorto;
         this.date = date;
     }
 
+    public String getLast_name() {
+        return last_name;
+    }
+
+    public void setLast_name(String last_name) {
+        this.last_name = last_name;
+    }
 
     public String getRol() {
         return rol;

@@ -11,5 +11,13 @@
     <string name="action_example">Example action</string>
     <string name="action_settings">Settings</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="stage">escoger una</string>
+    <string-array
+        name="string_array_stages">
+        <item>etapa 1</item>
+        <item>etapa 2</item>
+        <item>etapa 3</item>
+        <item>etapa 4</item>
 
+    </string-array>
 </resources>

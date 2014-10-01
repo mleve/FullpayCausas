@@ -44,12 +44,14 @@ public class CauseAdapter extends ArrayAdapter<Cause> {
             }
             TextView nameView = (TextView) view.findViewById(R.id.cause_name);
             if (nameView != null) {
-                nameView.setText(item.getName());
+                nameView.setText( item.getLast_name() + ", "+ item.getName());
             }
+            /*
             TextView stageView = (TextView) view.findViewById(R.id.cause_stage);
             if (stageView != null) {
                 stageView.setText(item.getStage());
             }
+            */
             TextView commentView = (TextView) view.findViewById(R.id.cause_comment);
             if (commentView != null) {
                 commentView.setText(item.getComment());
