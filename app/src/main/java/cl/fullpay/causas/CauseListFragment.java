@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,6 +61,7 @@ public class CauseListFragment extends Fragment {
                 });
 
         getCauseTask.execute((Void) null);
+
 
         adapter = new CauseAdapter(getActivity(),
                 R.layout.cause_list_item,
