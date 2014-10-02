@@ -72,7 +72,10 @@ public class CauseAdapter extends ArrayAdapter<Cause> {
             }
             TextView exhortoView = (TextView) view.findViewById(R.id.cause_exhorto);
             if (exhortoView != null) {
-                exhortoView.setText(item.getExhorto());
+                if(item.getExhorto().equals("1"))
+                    exhortoView.setText("C");
+                else
+                    exhortoView.setText("S");
             }
             TextView dateView = (TextView) view.findViewById(R.id.cause_last_change);
             if (dateView != null) {
