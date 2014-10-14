@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import cl.fullpay.causas.HttpTasks.HttpGetTask;
 
@@ -43,9 +44,9 @@ public class CauseListFragment extends Fragment {
         ArrayList<Cause> causeList = new ArrayList<Cause>();
 
         //Dummy content
-        Cause cause = new Cause("si","no","dummy","siii","no","sii","no","si");
-        Cause cause2 = new Cause("si","no","dummy","siii","no","sii","no","si");
-        Cause cause3= new Cause("si","no","dummy","siii","no","sii","no","si");
+        Cause cause = new Cause("012","2012","si","no","dummy","siii","no","sii","no");
+        Cause cause2 = new Cause("123","si","no","dummy","siii","no","sii","no","si");
+        Cause cause3= new Cause("424","si","no","dummy","siii","no","sii","no","si");
 
         causeList.add(cause);
         causeList.add(cause2);
@@ -95,6 +96,8 @@ public class CauseListFragment extends Fragment {
 
         if(causeList != null){
             JSONObject aux = null;
+            String rolAux =null;
+            ArrayList<Cause> causes = new ArrayList<Cause>();
             for(int i=0; i<causeList.length();i++){
                 try{
                     aux = causeList.getJSONObject(i);
@@ -104,7 +107,13 @@ public class CauseListFragment extends Fragment {
                 }
 
                 try{
-                    adapter.add(new Cause(aux.getString("rol"),
+
+                    rolAux = aux.getString("rol");
+
+                    String[] rol =rolAux.split("-");
+                    causes.add(new Cause(
+                            rol[0],
+                            rol[1],
                             aux.getString("rut"),
                             aux.getString("nombres"),
                             aux.getString("ap_pat"),
@@ -113,12 +122,15 @@ public class CauseListFragment extends Fragment {
                             aux.getString("exorto"),
                             aux.getString("fecha_etapa")));
 
-                }catch (JSONException e){
-                    Log.e(LOG_TAG,"error al leer campo de causa");
+                }catch (Exception e){
+                    Log.e(LOG_TAG,"error al leer campo de causa, input:"+ rolAux);
+                    e.printStackTrace();
                     continue;
                 }
 
             }
+            Collections.sort(causes);
+            adapter.addAll(causes);
         }
 
     }

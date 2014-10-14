@@ -3,14 +3,28 @@ package cl.fullpay.causas;
 /**
  * Created by mario on 25-09-14.
  */
-public class Cause {
+public class Cause implements Comparable {
 
-    private String rol,rut,name,last_name, stage,comment,exhorto,date;
+    private String rol;
+    private String rut;
+    private String name;
+    private String last_name;
+    private String stage;
+    private String comment;
+    private String exhorto;
+    private String date;
 
 
 
-    public Cause(String rol, String rut, String name, String last_name, String stage, String comment, String exhorto, String date) {
-        this.rol = rol;
+    private String rolNum;
+    private String rolYear;
+
+
+
+    public Cause(String rolNum,String rolYear, String rut, String name, String last_name, String stage, String comment, String exhorto, String date){
+
+        this.rolNum = rolNum;
+        this.rolYear = rolYear;
         this.rut = rut;
         this.name = name;
         this.last_name = last_name;
@@ -18,6 +32,22 @@ public class Cause {
         this.comment = comment;
         this.exhorto = exhorto;
         this.date = date;
+    }
+
+    public String getRolNum() {
+        return rolNum;
+    }
+
+    public void setRolNum(String rolNum) {
+        this.rolNum = rolNum;
+    }
+
+    public String getRolYear() {
+        return rolYear;
+    }
+
+    public void setRolYear(String rolYear) {
+        this.rolYear = rolYear;
     }
 
     public String getLast_name() {
@@ -82,5 +112,16 @@ public class Cause {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        Cause aux = (Cause) o;
+        int yearComp = rolYear.compareTo(aux.rolYear);
+
+        if(yearComp == 0){
+            return rolNum.compareTo(aux.rolNum);
+        }
+        return yearComp;
     }
 }

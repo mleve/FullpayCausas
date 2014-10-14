@@ -43,14 +43,13 @@
         android:prompt="@string/stage"
         android:id="@+id/cause_stage" />
 
-    <TextView
+    <EditText
         android:gravity="center"
         android:layout_weight="@integer/cause_big_field"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
         android:textSize="20sp"
-        android:background="@drawable/cell_border"
-        android:text="Comentario"
+        android:inputType="textMultiLine"
         android:id="@+id/cause_comment" />
     <TextView
         android:gravity="center"

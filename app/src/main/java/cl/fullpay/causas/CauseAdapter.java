@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
@@ -49,7 +50,7 @@ public class CauseAdapter extends ArrayAdapter<Cause> {
             //si
             TextView rolView = (TextView) view.findViewById(R.id.cause_rol);
             if (rolView != null) {
-                rolView.setText(item.getRol());
+                rolView.setText(item.getRolNum()+"-"+item.getRolYear());
             }
             TextView rutView = (TextView) view.findViewById(R.id.cause_rut);
             if (rutView != null) {
@@ -65,9 +66,14 @@ public class CauseAdapter extends ArrayAdapter<Cause> {
             if (stageView != null) {
                 stageView.setText(item.getStage());
             }
-            */
+            *//*
             TextView commentView = (TextView) view.findViewById(R.id.cause_comment);
             if (commentView != null) {
+                commentView.setText(item.getComment());
+            }
+            */
+            EditText commentView = (EditText) view.findViewById(R.id.cause_comment);
+            if (commentView != null){
                 commentView.setText(item.getComment());
             }
             TextView exhortoView = (TextView) view.findViewById(R.id.cause_exhorto);
