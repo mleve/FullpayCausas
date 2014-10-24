@@ -22,6 +22,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+            android:authorities="cl.fullpay.causas"
+            android:name=".data.FullpayProvider" />
     </application>
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->

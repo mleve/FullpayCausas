@@ -90,69 +90,12 @@ public class TestDb extends AndroidTestCase {
 
     }
 
-
-    private ContentValues createCourt(String id, String name, String parentId){
-        ContentValues values = new ContentValues();
-        values.put(CourtEntry._ID,id);
-        values.put(CourtEntry.COLUMN_NAME,name);
-        if(parentId != null)
-            values.put(CourtEntry.COLUMN_PARENT_COURT_KEY,parentId);
-
-        return values;
-
-    }
-    private ContentValues createStage(String id, String name){
-        ContentValues values = new ContentValues();
-        values.put(StageEntry._ID,id);
-        values.put(StageEntry.COLUMN_NAME,name);
-
-        return values;
-
-    }
-
-    private ContentValues createCause(String rolNum,String rolDate, String names,
-                                      String lastName, String comment, String changeDate,
-                                      String warrant, String courtKey, String stageKey,
-                                      String attorneyKey){
-        ContentValues values = new ContentValues();
-        values.put(CauseEntry.COLUMN_ROL_NUM, rolNum);
-        values.put(CauseEntry.COLUMN_ROL_DATE, rolDate);
-        values.put(CauseEntry.COLUMN_NAMES, names);
-        values.put(CauseEntry.COLUMN_LAST_NAME, lastName );
-        values.put(CauseEntry.COLUMN_COMMENT,comment );
-        values.put(CauseEntry.COLUMN_CHANGE_DATE, changeDate );
-        values.put(CauseEntry.COLUMN_WARRANT, warrant);
-        values.put(CauseEntry.COLUMN_COURT_KEY, courtKey);
-        values.put(CauseEntry.COLUMN_STAGE_KEY, stageKey);
-        values.put(CauseEntry.COLUMN_ATTORNEY_KEY, attorneyKey);
-
-        return values;
-
-    }
-
-    static void validateCursor(Cursor valueCursor, ContentValues expectedValues) {
-
-        assertTrue(valueCursor.moveToFirst());
-
-        Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
-        for (Map.Entry<String, Object> entry : valueSet) {
-            String columnName = entry.getKey();
-            int idx = valueCursor.getColumnIndex(columnName);
-            assertFalse(idx == -1);
-            String expectedValue = entry.getValue().toString();
-            assertEquals(expectedValue, valueCursor.getString(idx));
-        }
-        valueCursor.close();
-    }
-
-    public void testInsertWarrant(){
+    public void testInsertAttorney(){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         String username = "mleve";
         String password = "pass";
-        ContentValues attorney = new ContentValues();
-        attorney.put(AttorneyEntry.COLUMN_USERNAME, username);
-        attorney.put(AttorneyEntry.COLUMN_PASSWORD, password);
+        ContentValues attorney = createAttorney(username,password);
 
         long attorneyRowId = db.insert(AttorneyEntry.TABLE_NAME,null,attorney);
 
@@ -216,5 +159,69 @@ public class TestDb extends AndroidTestCase {
 
         validateCursor(cursor,causeValues);
 
+    }
+
+
+
+    public static ContentValues createCourt(String id, String name, String parentId){
+        ContentValues values = new ContentValues();
+        values.put(CourtEntry._ID,id);
+        values.put(CourtEntry.COLUMN_NAME,name);
+        if(parentId != null)
+            values.put(CourtEntry.COLUMN_PARENT_COURT_KEY,parentId);
+
+        return values;
+
+    }
+    public static ContentValues createStage(String id, String name){
+        ContentValues values = new ContentValues();
+        values.put(StageEntry._ID,id);
+        values.put(StageEntry.COLUMN_NAME,name);
+
+        return values;
+
+    }
+
+    public static ContentValues createAttorney(String username, String password){
+        ContentValues values = new ContentValues();
+        values.put(AttorneyEntry.COLUMN_USERNAME,username);
+        values.put(AttorneyEntry.COLUMN_PASSWORD,password);
+
+        return values;
+
+    }
+    public static ContentValues createCause(String rolNum,String rolDate, String names,
+                                            String lastName, String comment, String changeDate,
+                                            String warrant, String courtKey, String stageKey,
+                                            String attorneyKey){
+        ContentValues values = new ContentValues();
+        values.put(CauseEntry.COLUMN_ROL_NUM, rolNum);
+        values.put(CauseEntry.COLUMN_ROL_DATE, rolDate);
+        values.put(CauseEntry.COLUMN_NAMES, names);
+        values.put(CauseEntry.COLUMN_LAST_NAME, lastName );
+        values.put(CauseEntry.COLUMN_COMMENT,comment );
+        values.put(CauseEntry.COLUMN_CHANGE_DATE, changeDate );
+        values.put(CauseEntry.COLUMN_WARRANT, warrant);
+        values.put(CauseEntry.COLUMN_COURT_KEY, courtKey);
+        values.put(CauseEntry.COLUMN_STAGE_KEY, stageKey);
+        values.put(CauseEntry.COLUMN_ATTORNEY_KEY, attorneyKey);
+
+        return values;
+
+    }
+
+    static void validateCursor(Cursor valueCursor, ContentValues expectedValues) {
+
+        assertTrue(valueCursor.moveToFirst());
+
+        Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
+        for (Map.Entry<String, Object> entry : valueSet) {
+            String columnName = entry.getKey();
+            int idx = valueCursor.getColumnIndex(columnName);
+            assertFalse(idx == -1);
+            String expectedValue = entry.getValue().toString();
+            assertEquals(expectedValue, valueCursor.getString(idx));
+        }
+        valueCursor.close();
     }
 }
