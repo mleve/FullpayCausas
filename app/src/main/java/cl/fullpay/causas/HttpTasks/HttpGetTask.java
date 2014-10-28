@@ -42,6 +42,7 @@ public class HttpGetTask extends AsyncTask<Void, Void, String> {
         mUrl = url;
     }
 
+
     @Override
     protected String doInBackground(Void... params) {
 
@@ -105,6 +106,7 @@ public class HttpGetTask extends AsyncTask<Void, Void, String> {
 
         return responseStr;
     }
+
 
     @Override
     protected void onPostExecute(final String result) {

@@ -22,6 +22,7 @@ public class FullpayProvider extends ContentProvider{
     private static final int STAGE = 200;
     private static final int STAGE_ID = 201;
     private static final int ATTORNEY = 300;
+    private static final int ATTORNEY_WITH_NAME = 301;
     private static final int CAUSE= 400;
 
 
@@ -45,6 +46,7 @@ public class FullpayProvider extends ContentProvider{
         matcher.addURI(authority,FullpayContract.PATH_COURT + "/*",COURT_WITH_NAME);
         matcher.addURI(authority,FullpayContract.PATH_STAGE,STAGE);
         matcher.addURI(authority,FullpayContract.PATH_ATTORNEY,ATTORNEY);
+        matcher.addURI(authority,FullpayContract.PATH_ATTORNEY +"/*",ATTORNEY_WITH_NAME);
         matcher.addURI(authority,FullpayContract.PATH_CAUSE,CAUSE);
         return matcher;
     }
@@ -64,6 +66,8 @@ public class FullpayProvider extends ContentProvider{
                 return StageEntry.CONTENT_TYPE;
             case ATTORNEY:
                 return AttorneyEntry.CONTENT_TYPE;
+            case ATTORNEY_WITH_NAME:
+                return AttorneyEntry.CONTENT_ITEM_TYPE;
             case CAUSE:
                 return CauseEntry.CONTENT_TYPE;
             default:
@@ -128,7 +132,7 @@ public class FullpayProvider extends ContentProvider{
                 break;
             }
             case COURT_ID:{
-                retCursor = getCourtById(uri,projection,sortOrder);
+                retCursor = getCourtById(uri, projection, sortOrder);
                 break;
             }
             case COURT:{
@@ -167,6 +171,10 @@ public class FullpayProvider extends ContentProvider{
                 );
                 break;
             }
+            case ATTORNEY_WITH_NAME:{
+                retCursor = getAttorneyByUsername(uri,projection,sortOrder);
+                break;
+            }
             case CAUSE:{
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         CauseEntry.TABLE_NAME,
@@ -196,17 +204,36 @@ public class FullpayProvider extends ContentProvider{
     }
 
     @Override
-    public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
-        return 0;
+    public int update(Uri uri, ContentValues values, String selection, String[]
+                      selectionArgs) {
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsUpdated;
+
+        switch (match){
+            case ATTORNEY:
+                rowsUpdated = db.update(AttorneyEntry.TABLE_NAME,values,selection,selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: "+ uri);
+        }
+        if(rowsUpdated != 0)
+            getContext().getContentResolver().notifyChange(uri,null);
+
+        return rowsUpdated;
     }
 
     //querys Strings
 
     private static final SQLiteQueryBuilder sCourtQueryBuilder;
+    private static final SQLiteQueryBuilder sAttorneyQueryBuilder;
 
     static{
         sCourtQueryBuilder = new SQLiteQueryBuilder();
         sCourtQueryBuilder.setTables(CourtEntry.TABLE_NAME);
+
+        sAttorneyQueryBuilder = new SQLiteQueryBuilder();
+        sAttorneyQueryBuilder.setTables(AttorneyEntry.TABLE_NAME);
     }
 
 
@@ -214,6 +241,9 @@ public class FullpayProvider extends ContentProvider{
             CourtEntry.TABLE_NAME+"."+CourtEntry.COLUMN_NAME + " = ? ";
     private static final String sCourtById =
             CourtEntry.TABLE_NAME+"."+CourtEntry._ID + " = ? ";
+
+    private static final String sAttorneyByUsername =
+            AttorneyEntry.TABLE_NAME+"."+AttorneyEntry.COLUMN_USERNAME +" = ? ";
 
 
 
@@ -242,5 +272,17 @@ public class FullpayProvider extends ContentProvider{
                 sortOrder
         );
 
+    }
+
+    private Cursor getAttorneyByUsername(Uri uri, String[] projection, String sortOrder) {
+        String username = AttorneyEntry.getUsernameFromUri(uri);
+        return sAttorneyQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection,
+                sAttorneyByUsername,
+                new String[]{username},
+                null,
+                null,
+                sortOrder
+        );
     }
 }

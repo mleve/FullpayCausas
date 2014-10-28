@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -39,7 +40,9 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 
+import cl.fullpay.causas.HttpTasks.HttpGetTask;
 import cl.fullpay.causas.HttpTasks.HttpPostTask;
+import cl.fullpay.causas.data.FullpayContract;
 
 /**
  * A login screen that offers login via email/password.
@@ -148,14 +151,13 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
 
             String response = null;
 
-            String mPassword = encryptPassword(password);
+//            String mPassword = encryptPassword(password);
 
-            //TODO encode token in base64
             String token = "UHllWXRUcnB4MkZHZGp5UEFMclBhZEpm";
 
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             nameValuePairs.add(new BasicNameValuePair("username", username));
-            nameValuePairs.add(new BasicNameValuePair("password", mPassword));
+            nameValuePairs.add(new BasicNameValuePair("password", password));
             nameValuePairs.add(new BasicNameValuePair("token", token));
 
             mAuthTask = new HttpPostTask(nameValuePairs,
@@ -217,7 +219,17 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
             try{
                 JSONObject responseObj = new JSONObject(response);
                 if(responseObj.getInt("response") == 0) {
-                    this.startActivity(new Intent(this, Init.class));
+                    HttpGetTask sessionTask = new HttpGetTask(null,
+                            "http://dev.empchile.net/forseti/index.php/admin/api/getAuthSession/"+
+                            responseObj.getString("auth_token"),
+                            new HttpGetTask.OnPostExecuteListener() {
+                                @Override
+                                public void onPostExecute(String result) {
+                                    createAttorney(result);
+                                }
+                            });
+                    mAuthTask.execute((Void) null);
+                    //this.startActivity(new Intent(this, Init.class));
                     return;
                 }
                 else{
@@ -240,6 +252,20 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
 
         }
         Toast.makeText(this,toastMsg,Toast.LENGTH_LONG).show();
+    }
+
+    private void createAttorney(String result) {
+        ContentValues attorney = new ContentValues();
+        attorney.put(FullpayContract.AttorneyEntry.COLUMN_USERNAME,
+                mUsernameView.getText().toString());
+        attorney.put(FullpayContract.AttorneyEntry.COLUMN_PASSWORD,
+                mPasswordView.getText().toString());
+        try{
+            JSONObject aux = new JSONObject(result);
+            aux.getString("session_token");
+        }catch (Exception e){
+
+        }
     }
 
 

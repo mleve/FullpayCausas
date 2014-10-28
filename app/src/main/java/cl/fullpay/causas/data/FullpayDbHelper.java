@@ -43,11 +43,13 @@ public class FullpayDbHelper extends SQLiteOpenHelper {
                 "(%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "%s TEXT NOT NULL, "+
                 "%s TEXT NOT NULL, "+
+                "%s TEXT NOT NULL, "+
                 "UNIQUE ( %s ) ON CONFLICT REPLACE);",
                         AttorneyEntry.TABLE_NAME,
                         AttorneyEntry._ID,
                         AttorneyEntry.COLUMN_USERNAME,
                         AttorneyEntry.COLUMN_PASSWORD,
+                        AttorneyEntry.COLUMN_TOKEN,
                         AttorneyEntry.COLUMN_USERNAME
                 );
 

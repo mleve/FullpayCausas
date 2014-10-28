@@ -138,11 +138,11 @@ public class TestProvider extends AndroidTestCase {
         stageCursor.close();
     }
 
-    public void testInsertReadAttorney(){
+    public void testGetAttorneyByName(){
         FullpayDbHelper dbHelper = new FullpayDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        ContentValues attorneyValues = TestDb.createAttorney("mleve", "password");
+        ContentValues attorneyValues = TestDb.createAttorney("jorge", "password","3pi2$%&");
 
 
         Uri attorneyInsertUri = mContext.getContentResolver()
@@ -154,7 +154,7 @@ public class TestProvider extends AndroidTestCase {
         assertTrue(attorneyRowId != -1);
 
         Cursor attorneyCursor = mContext.getContentResolver().query(
-                AttorneyEntry.CONTENT_URI,
+                AttorneyEntry.buildAttorneyWithName("jorge"),
                 null,
                 null,
                 null,
@@ -164,6 +164,35 @@ public class TestProvider extends AndroidTestCase {
         TestDb.validateCursor(attorneyCursor,attorneyValues);
         attorneyCursor.close();
     }
+
+    public void testInsertReadAttorney(){
+        FullpayDbHelper dbHelper = new FullpayDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues attorneyValues = TestDb.createAttorney("mleve", "password","3pi2$%&");
+
+
+        Uri attorneyInsertUri = mContext.getContentResolver()
+                .insert(AttorneyEntry.CONTENT_URI, attorneyValues);
+
+        assertTrue(attorneyInsertUri != null);
+
+        long attorneyRowId = ContentUris.parseId(attorneyInsertUri);
+        assertTrue(attorneyRowId != -1);
+
+        Cursor attorneyCursor = mContext.getContentResolver().query(
+                AttorneyEntry.buildAttorneyWithName("mleve"),
+                null,
+                null,
+                null,
+                null
+        );
+
+        TestDb.validateCursor(attorneyCursor,attorneyValues);
+        attorneyCursor.close();
+    }
+
+
 
     public void testInsertReadCause(){
         FullpayDbHelper dbHelper = new FullpayDbHelper(mContext);

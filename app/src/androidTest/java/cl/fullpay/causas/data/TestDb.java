@@ -95,7 +95,7 @@ public class TestDb extends AndroidTestCase {
 
         String username = "mleve";
         String password = "pass";
-        ContentValues attorney = createAttorney(username,password);
+        ContentValues attorney = createAttorney(username,password,"sadasd3t45433");
 
         long attorneyRowId = db.insert(AttorneyEntry.TABLE_NAME,null,attorney);
 
@@ -182,11 +182,11 @@ public class TestDb extends AndroidTestCase {
 
     }
 
-    public static ContentValues createAttorney(String username, String password){
+    public static ContentValues createAttorney(String username, String password, String token){
         ContentValues values = new ContentValues();
         values.put(AttorneyEntry.COLUMN_USERNAME,username);
         values.put(AttorneyEntry.COLUMN_PASSWORD,password);
-
+        values.put(AttorneyEntry.COLUMN_TOKEN,token);
         return values;
 
     }

@@ -152,6 +152,7 @@ public class FullpayContract {
 
         public static final String COLUMN_USERNAME = "username";
         public static final String COLUMN_PASSWORD = "password";
+        public static final String COLUMN_TOKEN = "session_token";
 
         //ContentProvider cosas
         public static final Uri CONTENT_URI =
@@ -169,6 +170,14 @@ public class FullpayContract {
 
         public static Uri buildAttorneyUri(long id){
             return ContentUris.withAppendedId(CONTENT_URI,id);
+        }
+
+        public static Uri buildAttorneyWithName(String name){
+            return CONTENT_URI.buildUpon().appendPath(name).build();
+        }
+
+        public static String getUsernameFromUri(Uri uri){
+            return uri.getPathSegments().get(1);
         }
 
 
