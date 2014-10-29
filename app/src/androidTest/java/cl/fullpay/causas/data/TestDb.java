@@ -187,6 +187,7 @@ public class TestDb extends AndroidTestCase {
         values.put(AttorneyEntry.COLUMN_USERNAME,username);
         values.put(AttorneyEntry.COLUMN_PASSWORD,password);
         values.put(AttorneyEntry.COLUMN_TOKEN,token);
+        values.put(AttorneyEntry.COLUMN_IS_ACTIVE,1);
         return values;
 
     }

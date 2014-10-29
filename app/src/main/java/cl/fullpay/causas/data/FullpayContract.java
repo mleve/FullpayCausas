@@ -153,6 +153,7 @@ public class FullpayContract {
         public static final String COLUMN_USERNAME = "username";
         public static final String COLUMN_PASSWORD = "password";
         public static final String COLUMN_TOKEN = "session_token";
+        public static final String COLUMN_IS_ACTIVE = "is_active";
 
         //ContentProvider cosas
         public static final Uri CONTENT_URI =

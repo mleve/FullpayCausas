@@ -28,17 +28,14 @@ public class HttpGetTask extends AsyncTask<Void, Void, String> {
     private String mUrl=null;
     private ArrayList<NameValuePair> mParams;
 
-    private OnPostExecuteListener mPostExecuteListener = null;
 
     public static interface OnPostExecuteListener{
         void onPostExecute(String result);
     }
 
     public HttpGetTask(ArrayList<NameValuePair> params,
-                       String url,
-                       OnPostExecuteListener postExecuteListener) {
+                       String url) {
         mParams = params;
-        mPostExecuteListener = postExecuteListener;
         mUrl = url;
     }
 
@@ -108,14 +105,6 @@ public class HttpGetTask extends AsyncTask<Void, Void, String> {
     }
 
 
-    @Override
-    protected void onPostExecute(final String result) {
-        if (mPostExecuteListener != null){
-            mPostExecuteListener.onPostExecute(result);
-        }
-
-
-    }
 
     @Override
     protected void onCancelled() {

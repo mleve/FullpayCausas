@@ -6,6 +6,8 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -17,6 +19,8 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import cl.fullpay.causas.data.FullpayContract;
 
 
 public class Init extends Activity
@@ -35,6 +39,21 @@ public class Init extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //chequear que exista un usuario logeado o llevarlo a login
+
+        Cursor attorneyCursor = getContentResolver().query(
+                FullpayContract.AttorneyEntry.CONTENT_URI,
+                null,
+                FullpayContract.AttorneyEntry.COLUMN_IS_ACTIVE+" = ?",
+                new String[]{"1"},
+                null
+        );
+        if(!attorneyCursor.moveToFirst()){
+            //no hay usuario activo
+            startActivity(new Intent(getApplicationContext(),Login.class));
+        }
+
         setContentView(R.layout.activity_init);
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)

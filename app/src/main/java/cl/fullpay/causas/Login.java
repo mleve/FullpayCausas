@@ -42,6 +42,7 @@ import java.util.List;
 
 import cl.fullpay.causas.HttpTasks.HttpGetTask;
 import cl.fullpay.causas.HttpTasks.HttpPostTask;
+import cl.fullpay.causas.HttpTasks.LoginTask;
 import cl.fullpay.causas.data.FullpayContract;
 
 /**
@@ -54,7 +55,7 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private HttpPostTask mAuthTask = null;
+    private LoginTask mAuthTask = null;
     private final String LOG_TAG = Login.class.getSimpleName();
     // UI references.
     private AutoCompleteTextView mUsernameView;
@@ -160,15 +161,24 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
             nameValuePairs.add(new BasicNameValuePair("password", password));
             nameValuePairs.add(new BasicNameValuePair("token", token));
 
-            mAuthTask = new HttpPostTask(nameValuePairs,
-                    "http://dev.empchile.net/forseti/index.php/admin/api/auth",
-                    new HttpPostTask.OnPostExecuteListener() {
-                        @Override
-                        public void onPostExecute(String result) {
-                            processResponse(result);
-                        }
-                    });
-            mAuthTask.execute((Void) null);
+            mAuthTask = new LoginTask(nameValuePairs,
+                    "http://dev.empchile.net/forseti/index.php/admin/api",
+                    getApplicationContext()
+                    ){
+                @Override
+                protected void onPostExecute(Boolean aBoolean) {
+                    super.onPostExecute(aBoolean);
+                    if(aBoolean){
+                        startActivity(new Intent(getApplicationContext(),Init.class));
+                    }
+                    else{
+                        mPasswordView.setError("Usuario o clave incorrecto");
+                        mPasswordView.requestFocus();
+                        return;
+                    }
+                }
+            };
+            mAuthTask.execute();
         }
     }
 
@@ -205,6 +215,7 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
         return result;
     }
 
+    /*
     private void processResponse(String response){
         mAuthTask = null;
         showProgress(false);
@@ -267,8 +278,7 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
 
         }
     }
-
-
+ */
     private boolean isUsernameValid(String email) {
         return true;
     }

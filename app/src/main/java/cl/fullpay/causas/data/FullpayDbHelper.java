@@ -44,12 +44,14 @@ public class FullpayDbHelper extends SQLiteOpenHelper {
                 "%s TEXT NOT NULL, "+
                 "%s TEXT NOT NULL, "+
                 "%s TEXT NOT NULL, "+
+                "%s INTEGER DEFAULT 1, "+
                 "UNIQUE ( %s ) ON CONFLICT REPLACE);",
                         AttorneyEntry.TABLE_NAME,
                         AttorneyEntry._ID,
                         AttorneyEntry.COLUMN_USERNAME,
                         AttorneyEntry.COLUMN_PASSWORD,
                         AttorneyEntry.COLUMN_TOKEN,
+                        AttorneyEntry.COLUMN_IS_ACTIVE,
                         AttorneyEntry.COLUMN_USERNAME
                 );
 

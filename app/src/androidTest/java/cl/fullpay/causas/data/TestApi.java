@@ -22,6 +22,8 @@ import cl.fullpay.causas.data.FullpayContract.*;
 public class TestApi extends AndroidTestCase {
     public static final String LOG_TAG = TestApi.class.getSimpleName();
 
+    private static String baseApiUrl  =  "http://dev.empchile.net/forseti/index.php/admin/api";
+
     private String token = "UHllWXRUcnB4MkZHZGp5UEFMclBhZEpm";
 
     public void testDeleteDb(){
@@ -30,7 +32,6 @@ public class TestApi extends AndroidTestCase {
 
     public void testLogin(){
 
-        String url  =  "http://dev.empchile.net/forseti/index.php/admin/api";
 
         ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
         nameValuePairs.add(new BasicNameValuePair("username", "javi"));
@@ -39,7 +40,7 @@ public class TestApi extends AndroidTestCase {
 
         final CountDownLatch signal = new CountDownLatch(1);
         LoginTask task = new LoginTask(nameValuePairs,
-                url,
+                baseApiUrl,
                 mContext){
             @Override
             public void onPostExecute(Boolean s){
@@ -90,6 +91,42 @@ public class TestApi extends AndroidTestCase {
 
         }
 
+
+    }
+
+    public void testGetCourts(){
+
+
+
+        ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+        nameValuePairs.add(new BasicNameValuePair("username", "javi"));
+        nameValuePairs.add(new BasicNameValuePair("password", "javiera"));
+        nameValuePairs.add(new BasicNameValuePair("token", token));
+
+        final CountDownLatch signal = new CountDownLatch(1);
+
+        HttpGetTask task = new HttpGetTask(null,
+                baseApiUrl+"/getTribunales"){
+            @Override
+            public void onPostExecute(String s){
+                super.onPostExecute(s);
+
+                //Se recibio session_token?
+                assertTrue(s!=null);
+
+                signal.countDown();
+
+            }
+        };
+
+        task.execute();
+
+        try {
+            signal.await();
+        }
+        catch (Exception e){
+
+        }
 
     }
 }
