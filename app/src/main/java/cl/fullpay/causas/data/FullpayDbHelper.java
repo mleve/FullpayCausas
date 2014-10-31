@@ -58,6 +58,7 @@ public class FullpayDbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_CAUSE_TABLE =
                 String.format("CREATE TABLE %s " +
                 "(%s INTEGER PRIMARY KEY AUTOINCREMENT, "+
+         //TODO chequear que CAUSE_ID sea un campo unico
                 "%s INTEGER NOT NULL, "+
                 "%s INTEGER, "+
                 "%s TEXT, "+

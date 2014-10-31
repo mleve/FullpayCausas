@@ -40,7 +40,7 @@ public class Init extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        //TODO evitar que se pueda volver atras si es que se vino desde otra vista
 
 
         setContentView(R.layout.activity_init);

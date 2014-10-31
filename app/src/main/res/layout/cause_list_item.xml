@@ -34,7 +34,16 @@
         android:text="Nombre"
         android:id="@+id/cause_name" />
 
-
+    <TextView
+        android:gravity="center"
+        android:layout_weight="@integer/cause_big_field"
+        android:layout_width="0dp"
+        android:layout_height="fill_parent"
+        android:textSize="20sp"
+        android:background="@drawable/cell_border"
+        android:text="Etapa"
+        android:id="@+id/cause_stage" />
+    <!--
     <Spinner
         android:layout_width="0dp"
         android:layout_weight="@integer/cause_big_field"
@@ -42,7 +51,7 @@
         android:entries="@array/string_array_stages"
         android:prompt="@string/stage"
         android:id="@+id/cause_stage" />
-
+    -->
     <EditText
         android:gravity="center"
         android:layout_weight="@integer/cause_big_field"

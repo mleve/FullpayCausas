@@ -176,7 +176,7 @@ public class CausesCreator {
             String rut= cause.getString("rut");
             String names = cause.getString("nombres");
             String last_name = cause.getString("ap_pat");
-            String warrant = cause.getString("ap_pat");
+            String warrant = cause.getString("exorto");
             String stageId = cause.getString("id_etapa");
             String courtName = cause.getString("tribunal");
             String comment = cause.getString("observaciones");
