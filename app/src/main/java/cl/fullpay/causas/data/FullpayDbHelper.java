@@ -58,20 +58,24 @@ public class FullpayDbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_CAUSE_TABLE =
                 String.format("CREATE TABLE %s " +
                 "(%s INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                "%s INTEGER NOT NULL, "+
                 "%s INTEGER, "+
                 "%s TEXT, "+
+                "%s TEXT NOT NULL, "+
                 "%s TEXT NOT NULL, "+
                 "%s TEXT NOT NULL, " +
                 "%s TEXT NOT NULL, "+
                 "%s TEXT NOT NULL, "+
                 "%s TEXT NOT NULL, "+
-                "%s INTEGER NOT NULL, "+
+                "%s INTEGER, "+
                 "%s INTEGER NOT NULL, "+
                 "%s INTEGER NOT NULL, "+
                 "FOREIGN KEY ( %s ) REFERENCES %s (%s) , "+
                 "FOREIGN KEY ( %s ) REFERENCES %s (%s) , "+
                 "FOREIGN KEY ( %s ) REFERENCES %s (%s) );",
                         CauseEntry.TABLE_NAME,
+                        CauseEntry._ID,
+                        CauseEntry.COLUMN_CAUSE_ID,
                         CauseEntry.COLUMN_ROL_NUM,
                         CauseEntry.COLUMN_ROL_DATE,
                         CauseEntry.COLUMN_RUT,

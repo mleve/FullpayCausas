@@ -36,7 +36,7 @@ public class TestDb extends AndroidTestCase {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
 
-        ContentValues values = createCourt("1","1 civil de santiago",null);
+        ContentValues values = createCourt("200","1 civil de santiago",null);
         long courtRowId = db.insert(CourtEntry.TABLE_NAME,null,values);
 
         assertTrue(courtRowId != -1);
@@ -44,8 +44,8 @@ public class TestDb extends AndroidTestCase {
         Cursor cursor = db.query(
                 CourtEntry.TABLE_NAME,
                 null,
-                null,
-                null,
+                CourtEntry._ID+"= ?",
+                new String[]{"200"},
                 null,
                 null,
                 null,
@@ -117,7 +117,7 @@ public class TestDb extends AndroidTestCase {
     public void testInsertCause(){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        ContentValues courtValues = createCourt("2","1 civil","0");
+        ContentValues courtValues = createCourt("201","juzgado falso","0");
         long courtRowId = db.insert(CourtEntry.TABLE_NAME,null,courtValues);
         assertTrue(courtRowId != -1);
 
@@ -126,7 +126,7 @@ public class TestDb extends AndroidTestCase {
         assertTrue(stageRowId != -1);
 
         ContentValues causeValues = createCause(
-                "10212","2014","Mario Estefano","Leverone","ah si si", "20141009","C","2",
+                "54","123453422-k","10212","2014","Mario Estefano","Leverone","ah si si", "20141009","C","2",
                 "2","2"
         );
 
@@ -191,11 +191,13 @@ public class TestDb extends AndroidTestCase {
         return values;
 
     }
-    public static ContentValues createCause(String rolNum,String rolDate, String names,
+    public static ContentValues createCause(String cause_id,String rut,String rolNum,String rolDate, String names,
                                             String lastName, String comment, String changeDate,
                                             String warrant, String courtKey, String stageKey,
                                             String attorneyKey){
         ContentValues values = new ContentValues();
+        values.put(CauseEntry.COLUMN_CAUSE_ID, cause_id);
+        values.put(CauseEntry.COLUMN_RUT,rut);
         values.put(CauseEntry.COLUMN_ROL_NUM, rolNum);
         values.put(CauseEntry.COLUMN_ROL_DATE, rolDate);
         values.put(CauseEntry.COLUMN_NAMES, names);

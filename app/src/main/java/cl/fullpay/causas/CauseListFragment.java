@@ -2,8 +2,11 @@ package cl.fullpay.causas;
 
 
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,9 +28,10 @@ import cl.fullpay.causas.HttpTasks.HttpGetTask;
  * A simple {@link Fragment} subclass.
  *
  */
-public class CauseListFragment extends Fragment {
+public class CauseListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private final String LOG_TAG = CauseListFragment.class.getSimpleName();
+    private static final int CAUSES_LOADER = 0;
     CauseAdapter adapter;
     private HttpGetTask getCauseTask;
 
@@ -53,13 +57,8 @@ public class CauseListFragment extends Fragment {
         causeList.add(cause3);
 
         getCauseTask = new HttpGetTask(null,
-                "http://dev.empchile.net/forseti/index.php/admin/api/getCausas",
-                new HttpGetTask.OnPostExecuteListener() {
-                    @Override
-                    public void onPostExecute(String result) {
-                        updateAdapter(result);
-                    }
-                });
+                "http://dev.empchile.net/forseti/index.php/admin/api/getCausas"
+                );
 
         getCauseTask.execute((Void) null);
 
@@ -151,4 +150,18 @@ public class CauseListFragment extends Fragment {
     }
 
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
 }

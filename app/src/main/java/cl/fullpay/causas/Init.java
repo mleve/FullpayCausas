@@ -40,19 +40,8 @@ public class Init extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //chequear que exista un usuario logeado o llevarlo a login
 
-        Cursor attorneyCursor = getContentResolver().query(
-                FullpayContract.AttorneyEntry.CONTENT_URI,
-                null,
-                FullpayContract.AttorneyEntry.COLUMN_IS_ACTIVE+" = ?",
-                new String[]{"1"},
-                null
-        );
-        if(!attorneyCursor.moveToFirst()){
-            //no hay usuario activo
-            startActivity(new Intent(getApplicationContext(),Login.class));
-        }
+
 
         setContentView(R.layout.activity_init);
 
@@ -64,6 +53,10 @@ public class Init extends Activity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+
+
+
     }
 
     @Override

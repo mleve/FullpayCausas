@@ -24,6 +24,8 @@ public class FullpayContract {
 
         public static final String TABLE_NAME = "cause";
 
+        public static final String COLUMN_CAUSE_ID = "cause_id";
+
         public static final String COLUMN_ROL_NUM = "rol_num";
 
         public static final String COLUMN_ROL_DATE = "rol_date";

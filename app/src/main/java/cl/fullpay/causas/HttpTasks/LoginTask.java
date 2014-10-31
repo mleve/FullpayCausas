@@ -177,6 +177,7 @@ public class LoginTask extends AsyncTask<Void, Void, Boolean> {
 
         if(AttorneyCursor.moveToFirst()){
             //Tengo que actualizar sessionToken y por si acaso la password
+            AttorneyCursor.close();
             ContentValues values = new ContentValues();
             values.put(FullpayContract.AttorneyEntry.COLUMN_TOKEN,auth_session);
             values.put(FullpayContract.AttorneyEntry.COLUMN_PASSWORD,mParams.get(1).getValue());
@@ -188,6 +189,7 @@ public class LoginTask extends AsyncTask<Void, Void, Boolean> {
             );
         }
         else{
+            AttorneyCursor.close();
             ContentValues values = new ContentValues();
             values.put(FullpayContract.AttorneyEntry.COLUMN_USERNAME,mParams.get(0).getValue());
             values.put(FullpayContract.AttorneyEntry.COLUMN_PASSWORD,mParams.get(1).getValue());

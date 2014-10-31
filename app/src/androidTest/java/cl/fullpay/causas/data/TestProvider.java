@@ -17,10 +17,6 @@ public class TestProvider extends AndroidTestCase {
 
     public static final String LOG_TAG = TestProvider.class.getSimpleName();
 
-    public void testDeleteDb(){
-        mContext.deleteDatabase(FullpayDbHelper.DATABASE_NAME);
-    }
-
     public void testGetType(){
 
         String courtType = mContext.getContentResolver().getType(CourtEntry.CONTENT_URI);
@@ -38,10 +34,12 @@ public class TestProvider extends AndroidTestCase {
 
     public void testInsertReadCourt(){
 
+        assertTrue(mContext.deleteDatabase(FullpayDbHelper.DATABASE_NAME));
+
         FullpayDbHelper dbHelper = new FullpayDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        ContentValues courtValues = TestDb.createCourt("1","1 civil",null);
+        ContentValues courtValues = TestDb.createCourt("300","1 civil",null);
 
 
         Uri courtInsertUri = mContext.getContentResolver()
@@ -55,8 +53,8 @@ public class TestProvider extends AndroidTestCase {
         Cursor courtCursor = mContext.getContentResolver().query(
                 CourtEntry.CONTENT_URI,
                 null,
-                null,
-                null,
+                CourtEntry._ID+"= ?",
+                new String[]{"300"},
                 null
         );
 
@@ -111,11 +109,12 @@ public class TestProvider extends AndroidTestCase {
 
     }
 
+
     public void testInsertReadStage(){
         FullpayDbHelper dbHelper = new FullpayDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        ContentValues stageValues = TestDb.createStage("1","etapa 1");
+        ContentValues stageValues = TestDb.createStage("200","etapa 1");
 
 
         Uri stageInsertUri = mContext.getContentResolver()
@@ -129,8 +128,8 @@ public class TestProvider extends AndroidTestCase {
         Cursor stageCursor = mContext.getContentResolver().query(
                 StageEntry.CONTENT_URI,
                 null,
-                null,
-                null,
+                StageEntry._ID+"= ?",
+                new String[]{"200"},
                 null
         );
 
@@ -199,7 +198,7 @@ public class TestProvider extends AndroidTestCase {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         ContentValues causeValues = TestDb.createCause(
-                "10212", "2014", "Mario Estefano", "Leverone", "ah si si", "20141009", "C", "1",
+                "345","122343342-9","10212", "2014", "Mario Estefano", "Leverone", "ah si si", "20141009", "C", "1",
                 "1", "1"
         );
 
@@ -221,4 +220,5 @@ public class TestProvider extends AndroidTestCase {
         TestDb.validateCursor(causeCursor,causeValues);
         causeCursor.close();
     }
+
 }
