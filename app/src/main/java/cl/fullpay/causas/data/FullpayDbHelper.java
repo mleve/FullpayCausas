@@ -58,7 +58,6 @@ public class FullpayDbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_CAUSE_TABLE =
                 String.format("CREATE TABLE %s " +
                 "(%s INTEGER PRIMARY KEY AUTOINCREMENT, "+
-         //TODO chequear que CAUSE_ID sea un campo unico
                 "%s INTEGER NOT NULL, "+
                 "%s INTEGER, "+
                 "%s TEXT, "+
@@ -73,7 +72,8 @@ public class FullpayDbHelper extends SQLiteOpenHelper {
                 "%s INTEGER NOT NULL, "+
                 "FOREIGN KEY ( %s ) REFERENCES %s (%s) , "+
                 "FOREIGN KEY ( %s ) REFERENCES %s (%s) , "+
-                "FOREIGN KEY ( %s ) REFERENCES %s (%s) );",
+                "FOREIGN KEY ( %s ) REFERENCES %s (%s) ,"+
+                "UNIQUE (%s) ON CONFLICT IGNORE); ",
                         CauseEntry.TABLE_NAME,
                         CauseEntry._ID,
                         CauseEntry.COLUMN_CAUSE_ID,
@@ -96,7 +96,8 @@ public class FullpayDbHelper extends SQLiteOpenHelper {
                         StageEntry._ID,
                         CauseEntry.COLUMN_ATTORNEY_KEY,
                         AttorneyEntry.TABLE_NAME,
-                        AttorneyEntry._ID
+                        AttorneyEntry._ID,
+                        CauseEntry.COLUMN_CAUSE_ID
                        );
 
         sqLiteDatabase.execSQL(SQL_CREATE_COURT_TABLE);

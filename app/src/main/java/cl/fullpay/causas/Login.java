@@ -169,7 +169,8 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
                 protected void onPostExecute(Boolean aBoolean) {
                     super.onPostExecute(aBoolean);
                     if(aBoolean){
-                        startActivity(new Intent(getApplicationContext(),Init.class));
+                        startActivity(new Intent(getApplicationContext(),Main.class));
+                        finish();
                     }
                     else{
                         mPasswordView.setError("Usuario o clave incorrecto");

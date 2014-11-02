@@ -19,7 +19,19 @@ public class Main extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //chequear que exista un usuario logeado o llevarlo a login
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //Chequear que existe procurador o llevarlo a login
         Cursor attorneyCursor = getContentResolver().query(
                 FullpayContract.AttorneyEntry.CONTENT_URI,
                 null,
@@ -27,35 +39,50 @@ public class Main extends Activity {
                 new String[]{"1"},
                 null
         );
+
         if(!attorneyCursor.moveToFirst()){
             //no hay usuario activo
             startActivity(new Intent(getApplicationContext(),Login.class));
+            finish();
         }
         else{
             token = attorneyCursor.getString(
                     attorneyCursor.getColumnIndex(FullpayContract.AttorneyEntry.COLUMN_TOKEN)
             );
 
-            //TODO chequear que existan causas o ejecutar primera carga
+            Cursor causeCursor = getContentResolver().query(
+                    FullpayContract.CauseEntry.CONTENT_URI,
+                    null,
+                    null,
+                    null,
+                    null
+            );
 
-            setContentView(R.layout.first_init);
+            if (causeCursor.moveToFirst()){
+                startApp();
+            }
+            else {
 
-            final CausesCreator creator = new CausesCreator(getApplicationContext());
+                setContentView(R.layout.first_init);
 
-            HttpGetTask task = new HttpGetTask(null,
-                    baseApiUrl+"/getEtapas"){
-                @Override
-                public void onPostExecute(String s){
-                    super.onPostExecute(s);
-                    Boolean result = creator.createStages(s);
-                    createCourts(creator);
+    //TODO ejecutar la obtencion y guardado de datos en la BD en asynctasks
+                final CausesCreator creator = new CausesCreator(getApplicationContext());
+
+                HttpGetTask task = new HttpGetTask(null,
+                        baseApiUrl + "/getEtapas") {
+                    @Override
+                    public void onPostExecute(String s) {
+                        super.onPostExecute(s);
+                        Boolean result = creator.createStages(s);
+                        createCourts(creator);
 
 
-                }
-            };
-            task.execute();
+                    }
+                };
+                task.execute();
+
+            }
         }
-
 
     }
 
@@ -92,5 +119,6 @@ public class Main extends Activity {
 
     private void startApp() {
         startActivity(new Intent(getApplicationContext(),Init.class));
+        finish();
     }
 }
