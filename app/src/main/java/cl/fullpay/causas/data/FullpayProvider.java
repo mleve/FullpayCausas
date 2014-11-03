@@ -19,6 +19,7 @@ public class FullpayProvider extends ContentProvider{
     private static final int COURT = 100;
     private static final int COURT_ID = 101;
     private static final int COURT_WITH_NAME = 102;
+    private static final int COURTS_WITH_CAUSES= 103;
     private static final int STAGE = 200;
     private static final int STAGE_ID = 201;
     private static final int ATTORNEY = 300;
@@ -147,6 +148,10 @@ public class FullpayProvider extends ContentProvider{
                 );
                 break;
             }
+            case COURTS_WITH_CAUSES:{
+                retCursor = getCourtsWithCauses(uri,projection,sortOrder);
+                break;
+            }
             case STAGE:{
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         StageEntry.TABLE_NAME,
@@ -234,6 +239,8 @@ public class FullpayProvider extends ContentProvider{
 
         sAttorneyQueryBuilder = new SQLiteQueryBuilder();
         sAttorneyQueryBuilder.setTables(AttorneyEntry.TABLE_NAME);
+
+
     }
 
 
@@ -285,4 +292,18 @@ public class FullpayProvider extends ContentProvider{
                 sortOrder
         );
     }
+
+    private Cursor getCourtsWithCauses(Uri uri, String[] projection, String sortOrder) {
+        final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        return  db.rawQuery(
+                String.format(
+                        "SELECT DISTINCT %s FROM %s.%s ",
+                        CauseEntry.COLUMN_COURT_KEY,
+                        CauseEntry.TABLE_NAME,
+                        CauseEntry.COLUMN_COURT_KEY
+                ),
+                null
+        );
+    }
+
 }

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import cl.fullpay.causas.HttpTasks.HttpGetTask;
+import cl.fullpay.causas.adapters.CauseCursorAdapter;
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.data.FullpayContract.CauseEntry;
 
@@ -35,8 +36,10 @@ import cl.fullpay.causas.data.FullpayContract.CauseEntry;
  */
 public class CauseListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    public static final String COURT_NAME_BUNDLE = "bundle_court_name";
+
     private final String LOG_TAG = CauseListFragment.class.getSimpleName();
-    private SimpleCursorAdapter causesAdapter;
+    private CauseCursorAdapter causesAdapter;
     private static final int CAUSES_LOADER = 0;
     CauseAdapter adapter;
     private HttpGetTask getCauseTask;
@@ -45,9 +48,10 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
         // Required empty public constructor
     }
 
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        getLoaderManager().initLoader(CAUSES_LOADER,null,this);
+        //getLoaderManager().initLoader(CAUSES_LOADER,null,this);
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -56,7 +60,7 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_cause_list_2, container, false);
 
-
+/*
         causesAdapter = new SimpleCursorAdapter(
                 getActivity(),
                 R.layout.cause_list_item,
@@ -83,6 +87,22 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
                 0
         );
 
+*/
+        String courtName = null;
+        if(getArguments() != null){
+            courtName = getArguments().getString(COURT_NAME_BUNDLE);
+
+        }
+
+        //TODO Indicar en el action bar que tribunal estamos mirando
+
+        Cursor mCursor = buildCausesCursor(courtName);
+
+        causesAdapter = new CauseCursorAdapter(
+                getActivity(),
+                mCursor,
+                0
+        );
         ListView causeList = (ListView) rootView.findViewById(R.id.listview_cause);
         causeList.setAdapter(causesAdapter);
 
@@ -92,14 +112,43 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
 
     }
 
+    private Cursor buildCausesCursor(String courtName) {
+        if(courtName == null) {
+            return  getActivity().getContentResolver().query(
+                    CauseEntry.CONTENT_URI,
+                    null,
+                    null,
+                    null,
+                    CauseEntry.COLUMN_ROL_DATE + " ASC, " + CauseEntry.COLUMN_ROL_NUM + " ASC"
+            );
+        }else{
+            Cursor courtCursor = getActivity().getContentResolver().query(
+                    FullpayContract.CourtEntry.CONTENT_URI,
+                    null,
+                    FullpayContract.CourtEntry.COLUMN_NAME+"= ? ",
+                    new String[]{courtName},
+                    null
+            );
+
+            courtCursor.moveToFirst();
+            String courtId = courtCursor.getString(
+                    courtCursor.getColumnIndex(FullpayContract.CourtEntry._ID)
+            );
+            return  getActivity().getContentResolver().query(
+                    CauseEntry.CONTENT_URI,
+                    null,
+                    CauseEntry.COLUMN_COURT_KEY+"= ?",
+                    new String[]{courtId},
+                    CauseEntry.COLUMN_ROL_DATE + " ASC, " + CauseEntry.COLUMN_ROL_NUM + " ASC"
+            );
+
+        }
+
+    }
 
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        //TODO recibir como parametro la id de tribunal y cargar solo esas causas
-
-        //TODO entregar las causas ordenadas por rol
-
         Uri causesUri = FullpayContract.CauseEntry.CONTENT_URI;
         return new CursorLoader(
                 getActivity(),

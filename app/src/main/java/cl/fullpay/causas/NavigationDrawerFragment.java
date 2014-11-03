@@ -4,6 +4,9 @@ package cl.fullpay.causas;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,7 +23,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
+
+
+import cl.fullpay.causas.data.FullpayContract;
+import cl.fullpay.causas.data.FullpayContract.CauseEntry;
+import cl.fullpay.causas.data.FullpayDbHelper;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -97,17 +106,59 @@ public class NavigationDrawerFragment extends Fragment {
                 selectItem(position);
             }
         });
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1,
+
+        FullpayDbHelper dbHelper = new FullpayDbHelper(getActivity());
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        //TODO traspasar la query al content provider
+        Cursor courtCursor = db.rawQuery(
+                String.format(
+                        "SELECT %s.%s, %s, %s " +
+                                "FROM %s, %s " +
+                                "WHERE %s.%s = %s.%s " +
+                                "GROUP BY %s",
+                        CauseEntry.TABLE_NAME,
+                        CauseEntry._ID,
+                        CauseEntry.COLUMN_COURT_KEY,
+                        FullpayContract.CourtEntry.COLUMN_NAME,
+                        CauseEntry.TABLE_NAME,
+                        FullpayContract.CourtEntry.TABLE_NAME,
+                        CauseEntry.TABLE_NAME,
+                        CauseEntry.COLUMN_COURT_KEY,
+                        FullpayContract.CourtEntry.TABLE_NAME,
+                        FullpayContract.CourtEntry._ID,
+                        CauseEntry.COLUMN_COURT_KEY
+                ),
+                null
+        );
+
+
+        SimpleCursorAdapter causesAdapter = new SimpleCursorAdapter(
+                getActivity(),
+                R.layout.drawer_element,
+                courtCursor,
+                //Nombre de las columnas a las que se mapean los campos (En orden)
                 new String[]{
-                        "1 civil",
-                        "2 civil",
-                        "3 civil",
-                }));
+                        FullpayContract.CourtEntry.COLUMN_NAME
+                },
+                new int[]{
+                        R.id.drawer_item_text
+                },
+                0
+        );
+
+        mDrawerListView.setAdapter(
+                causesAdapter
+        );
+
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
+
         return mDrawerListView;
+    }
+
+
+    public View getSelectedView(int pos){
+        return mDrawerListView.getChildAt(pos);
     }
 
     public boolean isDrawerOpen() {
@@ -211,6 +262,8 @@ public class NavigationDrawerFragment extends Fragment {
         }
     }
 
+
+
     @Override
     public void onDetach() {
         super.onDetach();
@@ -269,6 +322,7 @@ public class NavigationDrawerFragment extends Fragment {
     private ActionBar getActionBar() {
         return getActivity().getActionBar();
     }
+
 
     /**
      * Callbacks interface that all activities using this fragment must implement.

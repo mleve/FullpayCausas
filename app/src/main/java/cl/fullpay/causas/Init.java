@@ -40,9 +40,6 @@ public class Init extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //TODO evitar que se pueda volver atras si es que se vino desde otra vista
-
-
         setContentView(R.layout.activity_init);
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
@@ -59,13 +56,34 @@ public class Init extends Activity
 
     }
 
+
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
+
+
+        String courtName = null;
+
+        if(mNavigationDrawerFragment != null){
+            View element =  mNavigationDrawerFragment.getSelectedView(position);
+            TextView courtNameView=(TextView) element.findViewById(R.id.drawer_item_text);
+            courtName = courtNameView.getText().toString();
+        }
+
+
+        Fragment causeList = new CauseListFragment();
+
+        if(courtName != null){
+            Bundle bundle = new Bundle();
+            bundle.putString(CauseListFragment.COURT_NAME_BUNDLE,courtName);
+            causeList.setArguments(bundle);
+        }
+
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, new CauseListFragment())
+                .replace(R.id.container, causeList)
                 .commit();
+
     }
 
     public void onSectionAttached(int number) {
