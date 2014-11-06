@@ -4,7 +4,15 @@ import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+
+import cl.fullpay.causas.AsyncTasks.CausesTask;
 import cl.fullpay.causas.HttpTasks.HttpGetTask;
 import cl.fullpay.causas.data.FullpayContract;
 
@@ -18,6 +26,7 @@ public class Main extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.first_init);
 
     }
 
@@ -50,7 +59,7 @@ public class Main extends Activity {
                     attorneyCursor.getColumnIndex(FullpayContract.AttorneyEntry.COLUMN_TOKEN)
             );
 
-            Cursor causeCursor = getContentResolver().query(
+            Cursor cursor = getContentResolver().query(
                     FullpayContract.CauseEntry.CONTENT_URI,
                     null,
                     null,
@@ -58,62 +67,51 @@ public class Main extends Activity {
                     null
             );
 
-            if (causeCursor.moveToFirst()){
+            if(cursor.moveToFirst() == true)
                 startApp();
-            }
-            else {
 
-                setContentView(R.layout.first_init);
+            CausesTask task = new CausesTask(getApplicationContext()){
+                @Override
+                protected Boolean doInBackground(Void... voids) {
 
-    //TODO ejecutar la obtencion y guardado de datos en la BD en asynctasks
-                final CausesCreator creator = new CausesCreator(getApplicationContext());
+                    String responseStr = httpGetRequest(baseUrl+"/getEtapas",null);
 
-                HttpGetTask task = new HttpGetTask(null,
-                        baseApiUrl + "/getEtapas") {
-                    @Override
-                    public void onPostExecute(String s) {
-                        super.onPostExecute(s);
-                        Boolean result = creator.createStages(s);
-                        createCourts(creator);
+                    int responseCode = getResponseCode(responseStr);
+
+                    if (responseCode != 0)
+                        return false;
+
+                    createStages(responseStr);
+
+                    responseStr = httpGetRequest(baseUrl+"/getTribunales",null);
+
+                    responseCode = getResponseCode(responseStr);
+
+                    if (responseCode != 0)
+                        return false;
+
+                    createCourts(responseStr);
+
+                    responseStr = httpGetRequest(baseUrl+"/getCuentaEtapasProcurador/"+token,null);
 
 
-                    }
-                };
-                task.execute();
+                    responseCode = getResponseCode(responseStr);
 
-            }
+                    if (responseCode != 0)
+                        return false;
+
+                    return createCauses(responseStr);
+                }
+
+                @Override
+                protected void onPostExecute(Boolean result) {
+                    startApp();
+                }
+            };
+
+            task.execute();
+
         }
-
-    }
-
-    public void createCourts(final CausesCreator creator){
-
-        HttpGetTask task = new HttpGetTask(null,
-                baseApiUrl+"/getTribunales"){
-            @Override
-            public void onPostExecute(String s){
-                Boolean result = creator.createCourts(s);
-                createCauses(creator);
-            }
-
-        };
-
-        task.execute();
-
-    }
-
-    private void createCauses(final CausesCreator creator) {
-        HttpGetTask task = new HttpGetTask(null,
-                baseApiUrl+"/getCausas/"+token){
-            @Override
-            public void onPostExecute(String s){
-                Boolean result = creator.createCauses(s);
-                startApp();
-            }
-
-        };
-
-        task.execute();
 
     }
 

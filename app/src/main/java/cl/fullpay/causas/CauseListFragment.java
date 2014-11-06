@@ -94,8 +94,6 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
 
         }
 
-        //TODO Indicar en el action bar que tribunal estamos mirando
-
         Cursor mCursor = buildCausesCursor(courtName);
 
         causesAdapter = new CauseCursorAdapter(
@@ -111,6 +109,8 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
 
 
     }
+
+
 
     private Cursor buildCausesCursor(String courtName) {
         if(courtName == null) {

@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,6 +38,8 @@ import cl.fullpay.causas.data.FullpayDbHelper;
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
 public class NavigationDrawerFragment extends Fragment {
+
+    private static final String LOG_TAG = NavigationDrawerFragment.class.getSimpleName();
 
     /**
      * Remember the position of the selected item.
@@ -110,25 +113,31 @@ public class NavigationDrawerFragment extends Fragment {
         FullpayDbHelper dbHelper = new FullpayDbHelper(getActivity());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
+        //TODO agregar de alguna manera la opcion null "sin tribunal asignado"
+
         //TODO traspasar la query al content provider
+
+        String query = String.format(
+                "SELECT %s.%s, %s, %s " +
+                        "FROM %s, %s " +
+                        "WHERE %s.%s = %s.%s " +
+                        "GROUP BY %s",
+                CauseEntry.TABLE_NAME,
+                CauseEntry._ID,
+                CauseEntry.COLUMN_COURT_KEY,
+                FullpayContract.CourtEntry.COLUMN_NAME,
+                CauseEntry.TABLE_NAME,
+                FullpayContract.CourtEntry.TABLE_NAME,
+                CauseEntry.TABLE_NAME,
+                CauseEntry.COLUMN_COURT_KEY,
+                FullpayContract.CourtEntry.TABLE_NAME,
+                FullpayContract.CourtEntry._ID,
+                CauseEntry.COLUMN_COURT_KEY
+        );
+        Log.d(LOG_TAG, "query para courts: "+query);
+
         Cursor courtCursor = db.rawQuery(
-                String.format(
-                        "SELECT %s.%s, %s, %s " +
-                                "FROM %s, %s " +
-                                "WHERE %s.%s = %s.%s " +
-                                "GROUP BY %s",
-                        CauseEntry.TABLE_NAME,
-                        CauseEntry._ID,
-                        CauseEntry.COLUMN_COURT_KEY,
-                        FullpayContract.CourtEntry.COLUMN_NAME,
-                        CauseEntry.TABLE_NAME,
-                        FullpayContract.CourtEntry.TABLE_NAME,
-                        CauseEntry.TABLE_NAME,
-                        CauseEntry.COLUMN_COURT_KEY,
-                        FullpayContract.CourtEntry.TABLE_NAME,
-                        FullpayContract.CourtEntry._ID,
-                        CauseEntry.COLUMN_COURT_KEY
-                ),
+                query,
                 null
         );
 

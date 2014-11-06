@@ -219,6 +219,15 @@ public class FullpayProvider extends ContentProvider{
             case ATTORNEY:
                 rowsUpdated = db.update(AttorneyEntry.TABLE_NAME,values,selection,selectionArgs);
                 break;
+            case COURT:
+                rowsUpdated = db.update(CourtEntry.TABLE_NAME,values,selection,selectionArgs);
+                break;
+            case STAGE:
+                rowsUpdated =db.update(StageEntry.TABLE_NAME,values,selection,selectionArgs);
+                break;
+            case CAUSE:
+                rowsUpdated = db.update(CauseEntry.TABLE_NAME,values,selection,selectionArgs);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: "+ uri);
         }

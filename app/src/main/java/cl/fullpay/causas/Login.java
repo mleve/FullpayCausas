@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -16,7 +15,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,12 +24,9 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -40,10 +35,7 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 
-import cl.fullpay.causas.HttpTasks.HttpGetTask;
-import cl.fullpay.causas.HttpTasks.HttpPostTask;
-import cl.fullpay.causas.HttpTasks.LoginTask;
-import cl.fullpay.causas.data.FullpayContract;
+import cl.fullpay.causas.AsyncTasks.BaseTask;
 
 /**
  * A login screen that offers login via email/password.
@@ -55,7 +47,7 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private LoginTask mAuthTask = null;
+    private BaseTask mAuthTask = null;
     private final String LOG_TAG = Login.class.getSimpleName();
     // UI references.
     private AutoCompleteTextView mUsernameView;
@@ -156,29 +148,32 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
 
             String token = "UHllWXRUcnB4MkZHZGp5UEFMclBhZEpm";
 
-            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+            final ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             nameValuePairs.add(new BasicNameValuePair("username", username));
             nameValuePairs.add(new BasicNameValuePair("password", password));
             nameValuePairs.add(new BasicNameValuePair("token", token));
 
-            mAuthTask = new LoginTask(nameValuePairs,
-                    "http://dev.empchile.net/forseti/index.php/admin/api",
-                    getApplicationContext()
-                    ){
+            mAuthTask = new BaseTask(getApplicationContext()) {
+                @Override
+                protected Boolean doInBackground(Void... voids) {
+                    return logInUser(nameValuePairs);
+
+                }
+
                 @Override
                 protected void onPostExecute(Boolean aBoolean) {
                     super.onPostExecute(aBoolean);
-                    if(aBoolean){
-                        startActivity(new Intent(getApplicationContext(),Main.class));
+                    if (aBoolean) {
+                        startActivity(new Intent(getApplicationContext(), Main.class));
                         finish();
-                    }
-                    else{
+                    } else {
                         mPasswordView.setError("Usuario o clave incorrecto");
                         mPasswordView.requestFocus();
                         return;
                     }
                 }
             };
+
             mAuthTask.execute();
         }
     }

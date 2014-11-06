@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
-import cl.fullpay.causas.Cause;
 import cl.fullpay.causas.data.FullpayContract.*;
 
 /**

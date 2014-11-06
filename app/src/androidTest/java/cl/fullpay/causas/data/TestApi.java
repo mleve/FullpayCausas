@@ -1,11 +1,8 @@
 package cl.fullpay.causas.data;
 
-import android.content.ContentValues;
-import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.Handler;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -13,11 +10,11 @@ import org.apache.http.message.BasicNameValuePair;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
-import cl.fullpay.causas.CausesCreator;
-import cl.fullpay.causas.HttpTasks.HttpGetTask;
-import cl.fullpay.causas.HttpTasks.LoginTask;
+import cl.fullpay.causas.AsyncTasks.BaseTask;
 
-import cl.fullpay.causas.Login;
+import cl.fullpay.causas.AsyncTasks.CausesTask;
+import cl.fullpay.causas.AsyncTasks.CourtsTask;
+import cl.fullpay.causas.AsyncTasks.StagesTask;
 import cl.fullpay.causas.data.FullpayContract.*;
 
 /**
@@ -35,19 +32,23 @@ public class TestApi extends AndroidTestCase {
     }
 
 
-    /*
+
     public void testLogin(){
 
 
-        ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+        final ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
         nameValuePairs.add(new BasicNameValuePair("username", "javi"));
         nameValuePairs.add(new BasicNameValuePair("password", "javiera"));
         nameValuePairs.add(new BasicNameValuePair("token", token));
 
         final CountDownLatch signal = new CountDownLatch(1);
-        LoginTask task = new LoginTask(nameValuePairs,
-                baseApiUrl,
-                mContext){
+        BaseTask task = new BaseTask(mContext){
+
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                return logInUser(nameValuePairs);
+            }
+
             @Override
             public void onPostExecute(Boolean s){
                 super.onPostExecute(s);
@@ -99,89 +100,21 @@ public class TestApi extends AndroidTestCase {
 
 
     }
-    */
-
-
-
-    public void testStages(){
-
-        final CausesCreator creator = new CausesCreator(mContext);
-
-        final CountDownLatch signal = new CountDownLatch(1);
-
-        HttpGetTask task = new HttpGetTask(null,
-                baseApiUrl+"/getEtapas"){
-            @Override
-            public void onPostExecute(String s){
-                super.onPostExecute(s);
-
-                //Se recibio respuesta?
-                assertTrue(s != null);
-
-                Boolean result = creator.createStages(s);
-
-                //Se crearon las stages?
-                assertTrue(result);
-
-                //Verificar creacion
-
-                Cursor stageCursor = mContext.getContentResolver().query(
-                        StageEntry.CONTENT_URI,
-                        null,
-                        StageEntry._ID+"= ?",
-                        new String[]{"78"},
-                        null
-                );
-
-                if(stageCursor.moveToFirst()){
-                    assertEquals("Notificacion Martillero",
-                            stageCursor.getString(
-                                    stageCursor.getColumnIndex(StageEntry.COLUMN_NAME)
-                            )
-                    );
-                }
-                else{
-                    fail("No se insertaron bien las etapas");
-                }
-
-
-                stageCursor.close();
-                signal.countDown();
-
-            }
-        };
-
-        task.execute();
-
-        try {
-            signal.await();
-        }
-        catch (Exception e){
-
-        }
-
-    }
 
 
     public void testCourts(){
 
-        final CausesCreator creator = new CausesCreator(mContext);
 
         final CountDownLatch signal = new CountDownLatch(1);
 
-        HttpGetTask task = new HttpGetTask(null,
-                baseApiUrl+"/getTribunales"){
+        CourtsTask task = new CourtsTask(getContext()){
             @Override
-            public void onPostExecute(String s){
-                super.onPostExecute(s);
+            protected void onPostExecute(Boolean result) {
+                super.onPostExecute(result);
 
                 //Se recibio respuesta?
-                assertTrue(s != null);
-
-                Boolean result = creator.createCourts(s);
-
-                //Se crearon las stages?
                 assertTrue(result);
+
 
                 //Verificar creacion
 
@@ -208,7 +141,59 @@ public class TestApi extends AndroidTestCase {
 
 
                 signal.countDown();
+            }
+        };
 
+        task.execute();
+
+        try {
+            signal.await();
+        }
+        catch (Exception e){
+
+        }
+
+    }
+
+
+    public void testStages(){
+
+        final CountDownLatch signal = new CountDownLatch(1);
+
+        StagesTask task = new StagesTask(getContext()){
+            @Override
+            protected void onPostExecute(Boolean result) {
+                super.onPostExecute(result);
+
+                //Se recibio respuesta?
+                assertTrue(result);
+
+
+                //Verificar creacion
+
+                Cursor stagesCursor = mContext.getContentResolver().query(
+                        StageEntry.CONTENT_URI,
+                        null,
+                        StageEntry._ID+"= ?",
+                        new String[]{"63"},
+                        null
+                );
+
+                if(stagesCursor.moveToFirst()){
+                    assertEquals("Apela",
+                            stagesCursor.getString(
+                                    stagesCursor.getColumnIndex(StageEntry.COLUMN_NAME)
+                            )
+                    );
+                }
+                else{
+                    fail("No se insertaron bien las etapas");
+                }
+
+                stagesCursor.close();
+
+
+                signal.countDown();
             }
         };
 
@@ -224,79 +209,104 @@ public class TestApi extends AndroidTestCase {
     }
 
     public void testCauses(){
-
-        final CausesCreator creator = new CausesCreator(mContext);
-
-
-        ContentValues attorney =TestDb.createAttorney("javi","javiera","aa37ffd189403f587ede71234c3b50a4");
-
-        Uri uri = mContext.getContentResolver().insert(
-                AttorneyEntry.CONTENT_URI,
-                attorney
-        );
-
-        assertTrue(uri != null);
-
-
         final CountDownLatch signal = new CountDownLatch(1);
 
-
-
-        //chequear que exista un usuario logeado o llevarlo a login
-        Cursor attorneyCursor = mContext.getContentResolver().query(
-                FullpayContract.AttorneyEntry.CONTENT_URI,
-                null,
-                FullpayContract.AttorneyEntry.COLUMN_IS_ACTIVE+" = ?",
-                new String[]{"1"},
-                null
-        );
-        if(!attorneyCursor.moveToFirst()){
-            //no hay usuario activo
-           fail("no hay abogado registrado");
-        }
-
-        //Insertar cortes
-
-        HttpGetTask task = new HttpGetTask(null,
-                baseApiUrl+"/getTribunales"){
+        CausesTask task = new CausesTask(getContext()){
             @Override
-            public void onPostExecute(String s){
-                super.onPostExecute(s);
+            protected Boolean doInBackground(Void... voids) {
 
-                //Se recibio respuesta?
-                assertTrue(s != null);
+                final ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+                nameValuePairs.add(new BasicNameValuePair("username", "javi"));
+                nameValuePairs.add(new BasicNameValuePair("password", "javiera"));
+                nameValuePairs.add(new BasicNameValuePair("token", token));
 
-                Boolean result = creator.createCourts(s);
+                assertTrue(logInUser(nameValuePairs));
 
-                //Se crearon las stages?
-                assertTrue(result);
 
-                //Verificar creacion
+                String responseStr = httpGetRequest(baseUrl+"/getEtapas",null);
+                Log.d(LOG_TAG,"respuesta de Etapas: "+responseStr);
 
-                Cursor courtCursor = mContext.getContentResolver().query(
-                        CourtEntry.CONTENT_URI,
+                int responseCode = getResponseCode(responseStr);
+
+                if (responseCode != 0)
+                    return false;
+
+                assertTrue(createStages(responseStr));
+
+                responseStr = httpGetRequest(baseUrl+"/getTribunales",null);
+                Log.d(LOG_TAG,"respuesta de Tribunales: "+responseStr);
+
+                responseCode = getResponseCode(responseStr);
+
+                if (responseCode != 0)
+                    return false;
+
+                assertTrue(createCourts(responseStr));
+
+                Cursor attorneyCursor = mContext.getContentResolver().query(
+                        FullpayContract.AttorneyEntry.CONTENT_URI,
                         null,
-                        CourtEntry._ID+"= ?",
-                        new String[]{"43"},
+                        FullpayContract.AttorneyEntry.COLUMN_IS_ACTIVE+"= ?",
+                        new String[]{"1"},
                         null
                 );
 
-                if(courtCursor.moveToFirst()){
-                    assertEquals("4 San Miguel",
-                            courtCursor.getString(
-                                    courtCursor.getColumnIndex(CourtEntry.COLUMN_NAME)
+                String token;
+                if(attorneyCursor.moveToFirst()){
+                    token = attorneyCursor.getString(
+                            attorneyCursor.getColumnIndex(
+                                    FullpayContract.AttorneyEntry.COLUMN_TOKEN
                             )
                     );
                 }
                 else{
-                    fail("No se insertaron bien las cortes");
+                    return false;
                 }
 
-                courtCursor.close();
+                responseStr = httpGetRequest(baseUrl+"/getCuentaEtapasProcurador/"+token,null);
+                Log.d(LOG_TAG, "respuesta de causas: " + responseStr);
+
+                responseCode = getResponseCode(responseStr);
+
+                if (responseCode != 0)
+                    return false;
+
+                return createCauses(responseStr);
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                super.onPostExecute(result);
+
+                //Se recibio respuesta?
+                assertTrue(result);
+
+
+                //Verificar creacion
+
+                Cursor causesCursor = mContext.getContentResolver().query(
+                        CauseEntry.CONTENT_URI,
+                        null,
+                        CauseEntry.COLUMN_CAUSE_ID+"= ?",
+                        new String[]{"56"},
+                        null
+                );
+
+                if(causesCursor.moveToFirst()){
+                    assertEquals("16285832-7",
+                            causesCursor.getString(
+                                    causesCursor.getColumnIndex(CauseEntry.COLUMN_RUT)
+                            )
+                    );
+                }
+                else{
+                    fail("No se insertaron bien las causas");
+                }
+
+                causesCursor.close();
 
 
                 signal.countDown();
-
             }
         };
 
@@ -308,67 +318,7 @@ public class TestApi extends AndroidTestCase {
         catch (Exception e){
 
         }
-
-
-
-
-
-        String token = attorneyCursor.getString(
-                attorneyCursor.getColumnIndex(AttorneyEntry.COLUMN_TOKEN));
-
-
-        final CountDownLatch signal2 = new CountDownLatch(1);
-        HttpGetTask causeTask = new HttpGetTask(null,
-                baseApiUrl+"/getCausas/"+token){
-            @Override
-            public void onPostExecute(String s){
-                super.onPostExecute(s);
-
-                //Se recibio respuesta?
-                assertTrue(s != null);
-
-                Boolean result = creator.createCauses(s);
-
-                //Se crearon las causas?
-                assertTrue(result);
-
-                //Verificar creacion
-
-                Cursor causeCursor = mContext.getContentResolver().query(
-                        CauseEntry.CONTENT_URI,
-                        null,
-                        CauseEntry.COLUMN_CAUSE_ID+"= ?",
-                        new String[]{"94"},
-                        null
-                );
-
-                if(causeCursor.moveToFirst()){
-                    assertEquals("15987309-9",
-                            causeCursor.getString(
-                                    causeCursor.getColumnIndex(CauseEntry.COLUMN_RUT)
-                            )
-                    );
-                }
-                else{
-                    fail("No se insertaron bien las Causas");
-                }
-
-
-                causeCursor.close();
-                signal2.countDown();
-
-            }
-        };
-
-        causeTask.execute();
-
-        try {
-            signal2.await();
-        }
-        catch (Exception e){
-
-        }
-
     }
+
 
 }
