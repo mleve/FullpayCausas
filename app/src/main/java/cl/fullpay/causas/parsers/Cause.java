@@ -53,7 +53,8 @@ public class Cause implements ParserInterface {
         rut = obj.getString("rut");
         lastName = obj.getString("ap_pat");
         stageDate = obj.getString("fecha_etapa");
-        comments = obj.getString("observaciones");
+        comments = (obj.getString("observaciones").equals("null")) ? "" : obj.getString("observaciones");
+
     }
 
     @Override

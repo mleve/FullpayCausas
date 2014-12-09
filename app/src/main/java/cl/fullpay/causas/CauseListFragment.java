@@ -41,7 +41,6 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
     private final String LOG_TAG = CauseListFragment.class.getSimpleName();
     private CauseCursorAdapter causesAdapter;
     private static final int CAUSES_LOADER = 0;
-    CauseAdapter adapter;
     private HttpGetTask getCauseTask;
 
     public CauseListFragment() {

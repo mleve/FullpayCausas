@@ -162,6 +162,8 @@ public class CauseCursorAdapter  extends CursorAdapter{
 
     private void saveStage(Cursor cursor, long id) {
         //TODO ver que pasa con las causas con etapa=null, se estan cambiando a etapa=1
+
+        //TODO guardar cambio de etapa la Bd
         int stageId = cursor.getInt(
                 cursor.getColumnIndex(CauseEntry.COLUMN_STAGE_KEY)
         );
@@ -195,6 +197,8 @@ public class CauseCursorAdapter  extends CursorAdapter{
         }
 
     }
+
+    //TODO guardar cambio de fecha al cambiar etapa
 
 
 }
