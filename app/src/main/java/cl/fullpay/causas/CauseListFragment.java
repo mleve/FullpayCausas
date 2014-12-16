@@ -41,6 +41,7 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
     private final String LOG_TAG = CauseListFragment.class.getSimpleName();
     private CauseCursorAdapter causesAdapter;
     private static final int CAUSES_LOADER = 0;
+    private String courtName;
     private HttpGetTask getCauseTask;
 
     public CauseListFragment() {
@@ -50,7 +51,7 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        //getLoaderManager().initLoader(CAUSES_LOADER,null,this);
+        getLoaderManager().initLoader(CAUSES_LOADER,null,this);
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -59,17 +60,18 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_cause_list_2, container, false);
 
-        String courtName = null;
+        //Por defecto quiero que entre a la corte de SANTIAGO
+        courtName = "SANTIAGO";
         if(getArguments() != null){
             courtName = getArguments().getString(COURT_NAME_BUNDLE);
 
         }
 
-        Cursor mCursor = buildCausesCursor(courtName);
+        //Cursor mCursor = buildCausesCursor(courtName);
 
         causesAdapter = new CauseCursorAdapter(
                 getActivity(),
-                mCursor,
+                null, //mCursor,
                 0
         );
         ListView causeList = (ListView) rootView.findViewById(R.id.listview_cause);
@@ -84,6 +86,7 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
 
 
     private Cursor buildCausesCursor(String courtName) {
+
         if(courtName == null) {
             return  getActivity().getContentResolver().query(
                     CauseEntry.CONTENT_URI,
@@ -121,14 +124,67 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Uri causesUri = FullpayContract.CauseEntry.CONTENT_URI;
-        return new CursorLoader(
+        Cursor courtCursor = getActivity().getContentResolver().query(
+                FullpayContract.CourtEntry.CONTENT_URI,
+                null,
+                FullpayContract.CourtEntry.COLUMN_NAME+"= ? ",
+                new String[]{courtName},
+                null
+        );
+
+        courtCursor.moveToFirst();
+        String courtId = courtCursor.getString(
+                courtCursor.getColumnIndex(FullpayContract.CourtEntry._ID)
+        );
+        courtCursor.close();
+
+        return  new CursorLoader(
                 getActivity(),
                 causesUri,
                 null,
-                null,
-                null,
-                null
+                CauseEntry.COLUMN_COURT_KEY+"= ?",
+                new String[]{courtId},
+                CauseEntry.COLUMN_ROL_DATE + " ASC, " + CauseEntry.COLUMN_ROL_NUM + " ASC"
         );
+
+
+        /*
+        if(courtName == null) {
+            return new CursorLoader(
+                    getActivity(),
+                    causesUri,
+                    null,
+                    null,
+                    null,
+                    CauseEntry.COLUMN_ROL_DATE + " ASC, " + CauseEntry.COLUMN_ROL_NUM + " ASC"
+            );
+        }else{
+            Cursor courtCursor = getActivity().getContentResolver().query(
+                    FullpayContract.CourtEntry.CONTENT_URI,
+                    null,
+                    FullpayContract.CourtEntry.COLUMN_NAME+"= ? ",
+                    new String[]{courtName},
+                    null
+            );
+
+            courtCursor.moveToFirst();
+            String courtId = courtCursor.getString(
+                    courtCursor.getColumnIndex(FullpayContract.CourtEntry._ID)
+            );
+            courtCursor.close();
+
+            return  new CursorLoader(
+                    getActivity(),
+                    causesUri,
+                    null,
+                    CauseEntry.COLUMN_COURT_KEY+"= ?",
+                    new String[]{courtId},
+                    CauseEntry.COLUMN_ROL_DATE + " ASC, " + CauseEntry.COLUMN_ROL_NUM + " ASC"
+            );
+
+        }
+        */
+
     }
 
     @Override
