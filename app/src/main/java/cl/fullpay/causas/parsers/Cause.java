@@ -7,6 +7,11 @@ import android.database.Cursor;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.data.FullpayContract.CauseEntry;
 
@@ -53,6 +58,15 @@ public class Cause implements ParserInterface {
         rut = obj.getString("rut");
         lastName = obj.getString("ap_pat");
         stageDate = obj.getString("fecha_etapa");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date date;
+        try{
+            date = formatter.parse(stageDate);
+        }catch(ParseException e){
+            date = Calendar.getInstance().getTime();
+        }
+        formatter.applyPattern("dd-MM-yyyy");
+        stageDate = formatter.format(date);
         comments = (obj.getString("observaciones").equals("null")) ? "" : obj.getString("observaciones");
 
     }

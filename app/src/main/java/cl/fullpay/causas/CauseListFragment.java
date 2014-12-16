@@ -59,34 +59,6 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_cause_list_2, container, false);
 
-/*
-        causesAdapter = new SimpleCursorAdapter(
-                getActivity(),
-                R.layout.cause_list_item,
-                null,
-                //Nombre de las columnas a las que se mapean los campos (En orden)
-                new String[]{
-                        CauseEntry.COLUMN_ROL_NUM,
-                        CauseEntry.COLUMN_RUT,
-                        CauseEntry.COLUMN_NAMES,
-                        CauseEntry.COLUMN_STAGE_KEY,
-                        CauseEntry.COLUMN_COMMENT,
-                        CauseEntry.COLUMN_WARRANT,
-                        CauseEntry.COLUMN_CHANGE_DATE
-                },
-                new int[]{
-                        R.id.cause_rol,
-                        R.id.cause_rut,
-                        R.id.cause_name,
-                        R.id.cause_stage,
-                        R.id.cause_comment,
-                        R.id.cause_exhorto,
-                        R.id.cause_last_change
-                },
-                0
-        );
-
-*/
         String courtName = null;
         if(getArguments() != null){
             courtName = getArguments().getString(COURT_NAME_BUNDLE);
@@ -164,6 +136,8 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
         causesAdapter.swapCursor(data);
 
     }
+
+
 
     @Override
     public void onLoaderReset(Loader<Cursor> objectLoader) {

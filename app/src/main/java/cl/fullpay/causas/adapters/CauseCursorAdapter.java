@@ -1,5 +1,6 @@
 package cl.fullpay.causas.adapters;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.text.Editable;
@@ -15,6 +16,9 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import cl.fullpay.causas.R;
 import cl.fullpay.causas.data.FullpayContract;
@@ -42,6 +46,7 @@ public class CauseCursorAdapter  extends CursorAdapter{
 
     }
 
+
     private void initStageSpinner(Context context){
         if(stageSpinnerAdapter == null){
             Cursor stageCursor = context.getContentResolver().query(
@@ -66,20 +71,24 @@ public class CauseCursorAdapter  extends CursorAdapter{
     }
 
     @Override
-    public void bindView(View view, Context context, final Cursor cursor) {
+    public void bindView(View view, final Context context, final Cursor cursor) {
 
-        TextView rolView = (TextView)view.findViewById(R.id.cause_rol);
+        final TextView rolView = (TextView)view.findViewById(R.id.cause_rol);
         TextView rutView = (TextView)view.findViewById(R.id.cause_rut);
         TextView namesView = (TextView)view.findViewById(R.id.cause_name);
         TextView warrantView = (TextView)view.findViewById(R.id.cause_exhorto);
-        TextView lastChangeView = (TextView)view.findViewById(R.id.cause_last_change);
-        EditText commentView= (EditText)view.findViewById(R.id.cause_comment);
+        final TextView lastChangeView = (TextView)view.findViewById(R.id.cause_last_change);
+        final EditText commentView= (EditText)view.findViewById(R.id.cause_comment);
 
         Spinner stageSpinner = (Spinner)view.findViewById(R.id.cause_stage);
 
 
 
-        String rolNum= cursor.getString(
+        final long id = cursor.getInt(
+                cursor.getColumnIndex(CauseEntry._ID)
+        );
+
+        final String rolNum= cursor.getString(
                 cursor.getColumnIndex(CauseEntry.COLUMN_ROL_NUM)
         );
 
@@ -108,11 +117,11 @@ public class CauseCursorAdapter  extends CursorAdapter{
                 cursor.getColumnIndex(CauseEntry.COLUMN_CHANGE_DATE)
         );
 
-        String comment= cursor.getString(
+        final String comment= cursor.getString(
                 cursor.getColumnIndex(CauseEntry.COLUMN_COMMENT)
         );
 
-        int stage = cursor.getInt(
+        final int stage = cursor.getInt(
                 cursor.getColumnIndex(CauseEntry.COLUMN_STAGE_KEY)
         );
 
@@ -136,17 +145,23 @@ public class CauseCursorAdapter  extends CursorAdapter{
             @Override
             public void onFocusChange(View view, boolean b) {
                 if(!b){
-                    String comment = ((EditText) view).getText().toString();
-                    saveComment(cursor,comment);
+                    String newComment = commentView.getText().toString();
+                    if(!newComment.equals(comment)){
+                        saveComment(newComment, id, rolNum,context);
+                        updateDate(lastChangeView,id);
+                    }
                 }
             }
         });
 
         stageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long id) {
-                //Log.d(LOG_TAG,"hola, estoy escuchando los cambios de lspinner");
-                saveStage(cursor,id);
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long spinnerElemId) {
+                //Log.d(LOG_TAG,"spinner, i = "+i+" id= "+id+" , stage= "+stage);
+                if(stage != spinnerElemId) {
+                    saveStage(context, id, spinnerElemId);
+                    updateDate(lastChangeView,id);
+                }
             }
 
             @Override
@@ -160,45 +175,49 @@ public class CauseCursorAdapter  extends CursorAdapter{
 
     }
 
-    private void saveStage(Cursor cursor, long id) {
-        //TODO ver que pasa con las causas con etapa=null, se estan cambiando a etapa=1
 
-        //TODO guardar cambio de etapa la Bd
-        int stageId = cursor.getInt(
-                cursor.getColumnIndex(CauseEntry.COLUMN_STAGE_KEY)
-        );
 
-        String causeId = cursor.getString(
-                cursor.getColumnIndex(CauseEntry._ID)
-        );
-
-        String rol= cursor.getString(
-                cursor.getColumnIndex(CauseEntry.COLUMN_ROL_NUM)
-        );
-
-        if(stageId != id){
-            Log.d(LOG_TAG,"la etapa de la causa de rol "+rol+" cambio a "+id);
-        }
+    private void updateDate(TextView lastChangeView, long causeId) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        String newDate = formatter.format(Calendar.getInstance().getTime());
+        lastChangeView.setText(newDate);
     }
 
-    private void saveComment(Cursor cursor, String newComment) {
-        String id= cursor.getString(
-                cursor.getColumnIndex(CauseEntry._ID)
+    private void saveComment(String newComment, long id, String rolNum, Context context) {
+
+
+        //TODO guardar commentario nuevo en el log
+        Log.d(LOG_TAG,"cambio la causa "+id+" ,rol: "+rolNum+" ,se comento: "+newComment);
+        ContentValues data = new ContentValues();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        String newDate = formatter.format(Calendar.getInstance().getTime());
+        data.put(CauseEntry.COLUMN_COMMENT,newComment);
+        data.put(CauseEntry.COLUMN_CHANGE_DATE,newDate);
+        context.getContentResolver().update(
+                CauseEntry.CONTENT_URI,
+                data,
+                CauseEntry._ID+"= "+id,
+                null
         );
-
-        String oldComment = cursor.getString(
-                cursor.getColumnIndex(CauseEntry.COLUMN_COMMENT)
-        );
-
-        if(!newComment.equals(oldComment)){
-            //TODO guardar commentario nuevo en el log
-            Log.d(LOG_TAG,"cambio la causa "+id+" ,se comento: "+newComment);
-
-        }
 
     }
 
-    //TODO guardar cambio de fecha al cambiar etapa
+    private void saveStage(Context context, long id, long newStageId) {
+        Log.d(LOG_TAG,"cambio la causa "+id+" , a nueva etapa: "+newStageId);
+        ContentValues data = new ContentValues();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        String newDate = formatter.format(Calendar.getInstance().getTime());
+        data.put(CauseEntry.COLUMN_STAGE_KEY,newStageId);
+        data.put(CauseEntry.COLUMN_CHANGE_DATE,newDate);
+        context.getContentResolver().update(
+                CauseEntry.CONTENT_URI,
+                data,
+                CauseEntry._ID+"= "+id,
+                null
+        );
+
+    }
+
 
 
 }
