@@ -12,6 +12,8 @@
     <string name="action_settings">Settings</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="stage">escoger una</string>
+    <string name="content_authority">cl.fullpay.causas</string>
+    <string name="sync_account_type">causas.fullpay.cl</string>
     <string-array
         name="string_array_stages">
         <item>etapa 1</item>

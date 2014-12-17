@@ -1,6 +1,10 @@
 package cl.fullpay.causas;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -15,6 +19,7 @@ import java.util.concurrent.CountDownLatch;
 import cl.fullpay.causas.AsyncTasks.CausesTask;
 import cl.fullpay.causas.HttpTasks.HttpGetTask;
 import cl.fullpay.causas.data.FullpayContract;
+import cl.fullpay.causas.data.FullpayProvider;
 
 /**
  * Created by mario on 30-10-14.
@@ -23,12 +28,17 @@ public class Main extends Activity {
 
     private String baseApiUrl  =  "http://dev.empchile.net/forseti/index.php/admin/api";
     private String token;
+
+
+    Account mAccount;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.first_init);
 
     }
+
+
 
     @Override
     protected void onStart() {

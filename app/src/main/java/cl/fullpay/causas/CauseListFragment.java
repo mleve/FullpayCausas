@@ -28,6 +28,7 @@ import cl.fullpay.causas.HttpTasks.HttpGetTask;
 import cl.fullpay.causas.adapters.CauseCursorAdapter;
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.data.FullpayContract.CauseEntry;
+import cl.fullpay.causas.syncAdapter.SyncAdapter;
 
 
 /**

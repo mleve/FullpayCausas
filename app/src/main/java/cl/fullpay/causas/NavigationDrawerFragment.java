@@ -31,6 +31,7 @@ import android.widget.Toast;
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.data.FullpayContract.CauseEntry;
 import cl.fullpay.causas.data.FullpayDbHelper;
+import cl.fullpay.causas.syncAdapter.SyncAdapter;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -311,6 +312,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         if (item.getItemId() == R.id.action_example) {
             Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
+            SyncAdapter.syncImmediately(getActivity());
             return true;
         }
 
