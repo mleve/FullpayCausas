@@ -20,6 +20,7 @@ import cl.fullpay.causas.AsyncTasks.CausesTask;
 import cl.fullpay.causas.HttpTasks.HttpGetTask;
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.data.FullpayProvider;
+import cl.fullpay.causas.syncAdapter.SyncAdapter;
 
 /**
  * Created by mario on 30-10-14.
@@ -79,47 +80,51 @@ public class Main extends Activity {
 
             if(cursor.moveToFirst() == true)
                 startApp();
+            else{
 
-            CausesTask task = new CausesTask(getApplicationContext()){
-                @Override
-                protected Boolean doInBackground(Void... voids) {
+                CausesTask task = new CausesTask(getApplicationContext()){
+                    @Override
+                    protected Boolean doInBackground(Void... voids) {
 
-                    String responseStr = httpGetRequest(baseUrl+"/getEtapas",null);
+                        String responseStr = httpGetRequest(baseUrl+"/getEtapas",null);
 
-                    int responseCode = getResponseCode(responseStr);
+                        int responseCode = getResponseCode(responseStr);
 
-                    if (responseCode != 0)
-                        return false;
+                        if (responseCode != 0)
+                            return false;
 
-                    createStages(responseStr);
+                        createStages(responseStr);
 
-                    responseStr = httpGetRequest(baseUrl+"/getTribunales",null);
+                        responseStr = httpGetRequest(baseUrl+"/getTribunales",null);
 
-                    responseCode = getResponseCode(responseStr);
+                        responseCode = getResponseCode(responseStr);
 
-                    if (responseCode != 0)
-                        return false;
+                        if (responseCode != 0)
+                            return false;
 
-                    createCourts(responseStr);
+                        createCourts(responseStr);
 
-                    responseStr = httpGetRequest(baseUrl+"/getCuentaEtapasProcurador/"+token,null);
+                        responseStr = httpGetRequest(baseUrl+"/getCuentaEtapasProcurador/"+token,null);
 
 
-                    responseCode = getResponseCode(responseStr);
+                        responseCode = getResponseCode(responseStr);
 
-                    if (responseCode != 0)
-                        return false;
+                        if (responseCode != 0)
+                            return false;
 
-                    return createCauses(responseStr);
-                }
+                        return createCauses(responseStr);
+                    }
 
-                @Override
-                protected void onPostExecute(Boolean result) {
-                    startApp();
-                }
-            };
+                    @Override
+                    protected void onPostExecute(Boolean result) {
+                        startApp();
+                    }
+                };
 
-            task.execute();
+                task.execute();
+
+            }
+
 
         }
 
@@ -127,6 +132,7 @@ public class Main extends Activity {
 
     private void startApp() {
         startActivity(new Intent(getApplicationContext(),Init.class));
+        SyncAdapter.initializeSyncAdapter(this);
         finish();
     }
 }
