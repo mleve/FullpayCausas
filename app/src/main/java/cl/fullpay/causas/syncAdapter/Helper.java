@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 
+import cl.fullpay.causas.R;
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.parsers.Attorney;
 import cl.fullpay.causas.parsers.Cause;
@@ -282,6 +283,30 @@ public class Helper {
         }
 
         return responseStr;
+
+    }
+
+    public String getUserToken(Context context){
+        //Chequear que existe procurador o llevarlo a login
+        Cursor attorneyCursor = context.getContentResolver().query(
+                FullpayContract.AttorneyEntry.CONTENT_URI,
+                null,
+                FullpayContract.AttorneyEntry.COLUMN_IS_ACTIVE+" = ?",
+                new String[]{"1"},
+                null
+        );
+
+
+        String token;
+        if(attorneyCursor.moveToFirst()){
+            token = attorneyCursor.getString(
+                    attorneyCursor.getColumnIndex(FullpayContract.AttorneyEntry.COLUMN_TOKEN)
+            );
+            return token;
+        }
+        else{
+            return null;
+        }
 
     }
 }

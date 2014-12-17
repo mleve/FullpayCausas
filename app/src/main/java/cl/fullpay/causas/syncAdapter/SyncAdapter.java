@@ -13,13 +13,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 import cl.fullpay.causas.AsyncTasks.CausesTask;
 import cl.fullpay.causas.R;
-import cl.fullpay.causas.data.FullpayContract;
+import cl.fullpay.causas.data.FullpayContract.*;
 import cl.fullpay.causas.parsers.Cause;
 
 /**
@@ -54,25 +58,46 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         //Chequear que existe procurador o llevarlo a login
         Cursor attorneyCursor = getContext().getContentResolver().query(
-                FullpayContract.AttorneyEntry.CONTENT_URI,
+                AttorneyEntry.CONTENT_URI,
                 null,
-                FullpayContract.AttorneyEntry.COLUMN_IS_ACTIVE+" = ?",
+                AttorneyEntry.COLUMN_IS_ACTIVE+" = ?",
                 new String[]{"1"},
                 null
         );
 
-        String token;
+        final ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+
+        String username;
+        String password;
+        String api_token = getContext().getString(R.string.api_token);
         if(attorneyCursor.moveToFirst()){
-            token = attorneyCursor.getString(
-                    attorneyCursor.getColumnIndex(FullpayContract.AttorneyEntry.COLUMN_TOKEN)
+            username = attorneyCursor.getString(
+                    attorneyCursor.getColumnIndex(AttorneyEntry.COLUMN_USERNAME)
+            );
+            password = attorneyCursor.getString(
+                    attorneyCursor.getColumnIndex(AttorneyEntry.COLUMN_PASSWORD)
             );
         }
         else{
             Log.d(LOG_TAG,"fallo al obtener el token desde la bd");
             return;
         }
+        nameValuePairs.add(new BasicNameValuePair("username", username));
+        nameValuePairs.add(new BasicNameValuePair("password", password));
+        nameValuePairs.add(new BasicNameValuePair("token", api_token));
+
+
 
         Helper helper = new Helper(getContext());
+
+        boolean login_result = helper.logInUser(nameValuePairs);
+
+        if(!login_result) {
+            Log.d(LOG_TAG,"fallo al tratar de logear al usuario");
+            return;
+        }
+
+
         String responseStr = helper.httpGetRequest(baseUrl + "/getEtapas", null);
 
         int responseCode = helper.getResponseCode(responseStr);
@@ -91,6 +116,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         if (responseCode != 0) {
             Log.d(LOG_TAG,"la carga de stages fallo");
             return;
+        }
+
+        String token = helper.getUserToken(getContext());
+
+        if(token == null){
+            Log.d(LOG_TAG,"error interno al tratar de obtener el session_token de la db");
         }
 
         helper.createCourts(responseStr);
