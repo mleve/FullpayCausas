@@ -7,7 +7,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import cl.fullpay.causas.parsers.Court;
 import cl.fullpay.causas.parsers.Stage;
 
 /**
@@ -43,7 +42,10 @@ public class StagesTask extends BaseTask{
                 JSONObject obj = courts.getJSONObject(i);
                 int id = obj.getInt("id");
                 String name = obj.getString("nombre");
-                Stage stage = new Stage(id,name);
+                String code = obj.getString("codigo");
+                String successor = obj.getString("sucesor");
+                String type = obj.getString("tipo");
+                Stage stage = new Stage(id, name, code, successor, type);
                 insertUpdate(stage);
             }
         }

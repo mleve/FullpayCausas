@@ -33,10 +33,16 @@ public class FullpayDbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_STAGE_TABLE =
                 String.format("CREATE TABLE %s "+
                 "(%s INTEGER PRIMARY KEY, "+
-                "%s TEXT NOT NULL )",
+                "%s TEXT NOT NULL, "+
+                "%s TEXT NOT NULL, "+
+                "%s TEXT, "+
+                "%s TEXT)",
                         StageEntry.TABLE_NAME,
                         StageEntry._ID,
-                        StageEntry.COLUMN_NAME);
+                        StageEntry.COLUMN_NAME,
+                        StageEntry.COLUMN_CODE,
+                        StageEntry.COLUMN_SUCCESSORS,
+                        StageEntry.COLUMN_TYPE);
 
         final String SQL_CREATE_ATTORNEY_TABLE =
                 String.format("CREATE TABLE %s "+

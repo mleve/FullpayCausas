@@ -26,7 +26,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import cl.fullpay.causas.data.FullpayContract.*;
 import cl.fullpay.causas.parsers.Attorney;
@@ -136,7 +135,10 @@ public class Helper {
                 JSONObject obj = courts.getJSONObject(i);
                 int id = obj.getInt("id");
                 String name = obj.getString("nombre");
-                Stage stage = new Stage(id,name);
+                String code = obj.getString("codigo");
+                String successor = obj.getString("sucesor");
+                String type = obj.getString("tipo");
+                Stage stage = new Stage(id, name, code, successor, type);
 
                 insertUpdate(stage);
             }
@@ -151,7 +153,6 @@ public class Helper {
     }
 
     protected int getResponseCode(String rawResponse){
-        //TODO relogear si responseCode = 23
         try {
             JSONObject response = new JSONObject(rawResponse);
             int responseCode = response.getInt("response");

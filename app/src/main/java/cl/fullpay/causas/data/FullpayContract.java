@@ -119,6 +119,9 @@ public class FullpayContract {
         public static final String TABLE_NAME = "stage";
 
         public static final String COLUMN_NAME = "name";
+        public static final String COLUMN_CODE = "code";
+        public static final String COLUMN_SUCCESSORS = "successors";
+        public static final String COLUMN_TYPE = "type";
 
         //ContentProvider cosas
         public static final Uri CONTENT_URI =
