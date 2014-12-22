@@ -1,5 +1,6 @@
 package cl.fullpay.causas.syncAdapter;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
@@ -10,6 +11,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,10 +21,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
-import cl.fullpay.causas.R;
-import cl.fullpay.causas.data.FullpayContract;
+import cl.fullpay.causas.data.FullpayContract.*;
 import cl.fullpay.causas.parsers.Attorney;
 import cl.fullpay.causas.parsers.Cause;
 import cl.fullpay.causas.parsers.Court;
@@ -46,16 +52,16 @@ public class Helper {
             JSONObject parsedResponse = new JSONObject(response);
             JSONArray causes = parsedResponse.getJSONArray("causas");
             Cursor cursor = mContext.getContentResolver().query(
-                    FullpayContract.AttorneyEntry.CONTENT_URI,
+                    AttorneyEntry.CONTENT_URI,
                     null,
-                    FullpayContract.AttorneyEntry.COLUMN_IS_ACTIVE+"= ?",
+                    AttorneyEntry.COLUMN_IS_ACTIVE+"= ?",
                     new String[]{""+1},
                     null
             );
             int attorneyId;
             if(cursor.moveToFirst()){
                 attorneyId = cursor.getInt(
-                        cursor.getColumnIndex(FullpayContract.AttorneyEntry._ID)
+                        cursor.getColumnIndex(AttorneyEntry._ID)
                 );
                 cursor.close();
             }
@@ -69,7 +75,7 @@ public class Helper {
                 cause.setAttorneyId(attorneyId);
                 String courtId;
                 Cursor CourtCursor = mContext.getContentResolver().query(
-                        FullpayContract.CourtEntry.buildCourtWithName(obj.getString("tribunal")),
+                        CourtEntry.buildCourtWithName(obj.getString("tribunal")),
                         null,
                         null,
                         null,
@@ -77,7 +83,7 @@ public class Helper {
                 );
                 if(CourtCursor.moveToFirst()){
                     courtId = CourtCursor.getString(
-                            CourtCursor.getColumnIndex(FullpayContract.CourtEntry._ID)
+                            CourtCursor.getColumnIndex(CourtEntry._ID)
                     );
                 }
                 else
@@ -234,7 +240,7 @@ public class Helper {
 
         String responseStr = null;
 
-        Log.d(LOG_TAG, "Intentando get a "+mUrl);
+        Log.d(LOG_TAG, "Intentando http a "+mUrl);
         //Autentificar
         try {
 
@@ -286,12 +292,13 @@ public class Helper {
 
     }
 
+
     public String getUserToken(Context context){
         //Chequear que existe procurador o llevarlo a login
         Cursor attorneyCursor = context.getContentResolver().query(
-                FullpayContract.AttorneyEntry.CONTENT_URI,
+                AttorneyEntry.CONTENT_URI,
                 null,
-                FullpayContract.AttorneyEntry.COLUMN_IS_ACTIVE+" = ?",
+                AttorneyEntry.COLUMN_IS_ACTIVE+" = ?",
                 new String[]{"1"},
                 null
         );
@@ -300,7 +307,7 @@ public class Helper {
         String token;
         if(attorneyCursor.moveToFirst()){
             token = attorneyCursor.getString(
-                    attorneyCursor.getColumnIndex(FullpayContract.AttorneyEntry.COLUMN_TOKEN)
+                    attorneyCursor.getColumnIndex(AttorneyEntry.COLUMN_TOKEN)
             );
             return token;
         }
@@ -308,5 +315,75 @@ public class Helper {
             return null;
         }
 
+    }
+
+    public void sendUpdatesToServer(Context context,String token) {
+
+        Cursor changedCausesCursor = context.getContentResolver().query(
+                CauseEntry.CONTENT_URI,
+                null,
+                CauseEntry.COLUMN_HAS_CHANGED+"=?",
+                new String[]{"1"},
+                null
+        );
+
+        while(changedCausesCursor.moveToNext()){
+            String idCause = changedCausesCursor.getString(
+                    changedCausesCursor.getColumnIndex(CauseEntry.COLUMN_CAUSE_ID)
+            );
+            String idStage   = changedCausesCursor.getString(
+                    changedCausesCursor.getColumnIndex(CauseEntry.COLUMN_STAGE_KEY)
+            );
+            String changeDate = changedCausesCursor.getString(
+                    changedCausesCursor.getColumnIndex(CauseEntry.COLUMN_CHANGE_DATE)
+            );
+            String comments   = changedCausesCursor.getString(
+                    changedCausesCursor.getColumnIndex(CauseEntry.COLUMN_COMMENT)
+            );
+
+            sendChanges(token,idCause,idStage,changeDate,comments);
+            setCauseUnchanged(idCause,context);
+        }
+        changedCausesCursor.close();
+    }
+
+    private void setCauseUnchanged(String idCause, Context ctx) {
+        ContentValues data = new ContentValues();
+        data.put(CauseEntry.COLUMN_HAS_CHANGED,"0");
+        ctx.getContentResolver().update(
+                CauseEntry.CONTENT_URI,
+                data,
+                CauseEntry.COLUMN_CAUSE_ID+"=?",
+                new String[]{""+idCause}
+        );
+    }
+
+    private void sendChanges(String token, String idCause, String idStage, String changeDate, String comments) {
+
+        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>(2);
+        params.add(new BasicNameValuePair("id_cuenta",idCause));
+        params.add(new BasicNameValuePair("id_etapa",idStage));
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        Date date;
+        try{
+            date = formatter.parse(changeDate);
+        }catch(ParseException e){
+            date = Calendar.getInstance().getTime();
+        }
+        formatter.applyPattern("yyyy-MM-dd");
+        String formatDate = formatter.format(date);
+        params.add(new BasicNameValuePair("fecha_etapa",formatDate));
+        params.add(new BasicNameValuePair("observaciones",comments));
+
+        Log.d(LOG_TAG,
+                String.format("Se envian a guardar: id_cuenta: %s , id_etapa %s , fecha_etapa: %s , observaciones: %s ",
+                        idCause,idStage,formatDate,comments)
+            );
+        String responseStr = httpGetRequest(baseUrl+"/insertCausa/"+token,params);
+
+        int responseCode = getResponseCode(responseStr);
+
+        if (responseCode != 0)
+            Log.d(LOG_TAG,"fallo al enviar causa: "+idCause+" response: "+responseStr);
     }
 }

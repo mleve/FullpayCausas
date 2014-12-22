@@ -70,6 +70,7 @@ public class FullpayDbHelper extends SQLiteOpenHelper {
                 "%s INTEGER, "+
                 "%s INTEGER NOT NULL, "+
                 "%s INTEGER NOT NULL, "+
+                "%s INTEGER DEFAULT 0, "+
                 "FOREIGN KEY ( %s ) REFERENCES %s (%s) , "+
                 "FOREIGN KEY ( %s ) REFERENCES %s (%s) , "+
                 "FOREIGN KEY ( %s ) REFERENCES %s (%s) ,"+
@@ -88,6 +89,7 @@ public class FullpayDbHelper extends SQLiteOpenHelper {
                         CauseEntry.COLUMN_COURT_KEY,
                         CauseEntry.COLUMN_STAGE_KEY,
                         CauseEntry.COLUMN_ATTORNEY_KEY,
+                        CauseEntry.COLUMN_HAS_CHANGED,
                         CauseEntry.COLUMN_COURT_KEY,
                         CourtEntry.TABLE_NAME,
                         CourtEntry._ID,

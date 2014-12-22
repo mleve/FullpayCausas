@@ -56,7 +56,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(LOG_TAG,"hola, deberia estar sincronizando");
         String baseUrl = "http://dev.empchile.net/forseti/index.php/admin/api";
 
-        //Chequear que existe procurador o llevarlo a login
         Cursor attorneyCursor = getContext().getContentResolver().query(
                 AttorneyEntry.CONTENT_URI,
                 null,
@@ -97,6 +96,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
 
+        String token = helper.getUserToken(getContext());
+
+        helper.sendUpdatesToServer(getContext(),token);
 
         String responseStr = helper.httpGetRequest(baseUrl + "/getEtapas", null);
 
@@ -118,7 +120,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
 
-        String token = helper.getUserToken(getContext());
+
 
         if(token == null){
             Log.d(LOG_TAG,"error interno al tratar de obtener el session_token de la db");

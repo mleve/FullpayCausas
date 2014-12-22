@@ -42,6 +42,8 @@ public class FullpayContract {
 
         public static final String COLUMN_CHANGE_DATE = "change_date";
 
+        public static final String COLUMN_HAS_CHANGED = "has_change";
+
         //Llaves foraneas
 
         public static final String COLUMN_COURT_KEY = "court_id";

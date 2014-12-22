@@ -214,7 +214,6 @@ public class FullpayProvider extends ContentProvider{
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         int rowsUpdated;
-
         switch (match){
             case ATTORNEY:
                 rowsUpdated = db.update(AttorneyEntry.TABLE_NAME,values,selection,selectionArgs);

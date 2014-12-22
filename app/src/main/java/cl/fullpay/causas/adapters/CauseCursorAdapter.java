@@ -193,6 +193,7 @@ public class CauseCursorAdapter  extends CursorAdapter{
         String newDate = formatter.format(Calendar.getInstance().getTime());
         data.put(CauseEntry.COLUMN_COMMENT,newComment);
         data.put(CauseEntry.COLUMN_CHANGE_DATE,newDate);
+        data.put(CauseEntry.COLUMN_HAS_CHANGED,"1");
         context.getContentResolver().update(
                 CauseEntry.CONTENT_URI,
                 data,
@@ -209,6 +210,7 @@ public class CauseCursorAdapter  extends CursorAdapter{
         String newDate = formatter.format(Calendar.getInstance().getTime());
         data.put(CauseEntry.COLUMN_STAGE_KEY,newStageId);
         data.put(CauseEntry.COLUMN_CHANGE_DATE,newDate);
+        data.put(CauseEntry.COLUMN_HAS_CHANGED,"1");
         context.getContentResolver().update(
                 CauseEntry.CONTENT_URI,
                 data,
