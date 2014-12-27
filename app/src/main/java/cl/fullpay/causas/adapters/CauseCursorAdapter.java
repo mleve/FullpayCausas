@@ -23,13 +23,13 @@ import java.util.Calendar;
 import cl.fullpay.causas.R;
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.data.FullpayContract.CauseEntry;
+import cl.fullpay.causas.data.FullpayContract.StageEntry;
 /**
  * Created by mario on 02-11-14.
  */
 public class CauseCursorAdapter  extends CursorAdapter{
     private LayoutInflater cursorInflater;
     private static final String LOG_TAG = CauseCursorAdapter.class.getSimpleName();
-    private SimpleCursorAdapter stageSpinnerAdapter;
 
     public CauseCursorAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
@@ -47,28 +47,7 @@ public class CauseCursorAdapter  extends CursorAdapter{
     }
 
 
-    private void initStageSpinner(Context context){
-        if(stageSpinnerAdapter == null){
-            Cursor stageCursor = context.getContentResolver().query(
-                    FullpayContract.StageEntry.CONTENT_URI,
-                    null,
-                    null,
-                    null,
-                    FullpayContract.StageEntry._ID+" ASC"
-            );
 
-            stageSpinnerAdapter = new SimpleCursorAdapter(
-                    context,
-                    android.R.layout.simple_spinner_item,
-                    stageCursor,
-                    new String[]{FullpayContract.StageEntry.COLUMN_NAME},
-                    new int[]{android.R.id.text1,
-                            0}
-            );
-
-            Log.d(LOG_TAG,"creo un SpinnerAdapter :P");
-        }
-    }
 
     @Override
     public void bindView(View view, final Context context, final Cursor cursor) {
@@ -137,9 +116,37 @@ public class CauseCursorAdapter  extends CursorAdapter{
         commentView.setText(comment);
 
         //Setear adapter de etapas en Spinner, indicando etapa en la que esta la causa
-        initStageSpinner(context);
+        Cursor stageCursor = context.getContentResolver().query(
+                StageEntry.CONTENT_URI,
+                null,
+                StageEntry._ID+"=?",
+                new String[]{""+stage},
+                null
+        );
+        stageCursor.moveToFirst();
+        String successors = stageCursor.getString(
+                stageCursor.getColumnIndex(
+                        StageEntry.COLUMN_SUCCESSORS
+                )
+        );
+
+        String stageCode = stageCursor.getString(
+                stageCursor.getColumnIndex(
+                        StageEntry.COLUMN_CODE
+                )
+        );
+
+
+        SimpleCursorAdapter stageSpinnerAdapter = initAdapter(context,stageCode,successors);
+        //initStageSpinner(context);
         stageSpinner.setAdapter(stageSpinnerAdapter);
-        stageSpinner.setSelection(stage-1);
+
+        if(!successors.equals("")){
+            stageSpinner.setSelection(0);
+        }
+        else{
+            stageSpinner.setSelection(stage-1);
+        }
 
         commentView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -175,6 +182,48 @@ public class CauseCursorAdapter  extends CursorAdapter{
 
     }
 
+    private SimpleCursorAdapter initAdapter(Context context, String stageCode, String successors) {
+        SimpleCursorAdapter stageAdapter;
+        Cursor stageCursor;
+        if(!successors.equals("")){
+            String[] stageCodes = successors.split(";");
+            String whereStatement = StageEntry.COLUMN_CODE+"='"+stageCode+"'";
+            for(String code : stageCodes){
+                whereStatement = whereStatement+" OR "+StageEntry.COLUMN_CODE+"='"+code+"'";
+            }
+            Log.d(LOG_TAG,"where Statement: "+whereStatement);
+            stageCursor = context.getContentResolver().query(
+                    StageEntry.CONTENT_URI,
+                    null,
+                    whereStatement,
+                    null,
+                    null
+            );
+        }
+        else {
+
+            stageCursor = context.getContentResolver().query(
+                    StageEntry.CONTENT_URI,
+                    null,
+                    null,
+                    null,
+                    StageEntry._ID + " ASC"
+            );
+        }
+        stageAdapter = new SimpleCursorAdapter(
+                context,
+                android.R.layout.simple_spinner_item,
+                stageCursor,
+                new String[]{FullpayContract.StageEntry.COLUMN_NAME},
+                new int[]{android.R.id.text1},
+                0
+        );
+
+        return stageAdapter;
+
+
+
+    }
 
 
     private void updateDate(TextView lastChangeView, long causeId) {
@@ -184,9 +233,6 @@ public class CauseCursorAdapter  extends CursorAdapter{
     }
 
     private void saveComment(String newComment, long id, String rolNum, Context context) {
-
-
-        //TODO guardar commentario nuevo en el log
         Log.d(LOG_TAG,"cambio la causa "+id+" ,rol: "+rolNum+" ,se comento: "+newComment);
         ContentValues data = new ContentValues();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
