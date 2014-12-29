@@ -123,20 +123,20 @@ public abstract class BaseTask extends AsyncTask<Void, Void, Boolean> {
 
 
 
-    protected boolean logInUser(ArrayList<NameValuePair> mParams){
+    protected int logInUser(ArrayList<NameValuePair> mParams){
         String responseStr = httpGetRequest(baseUrl+"/auth",mParams);
         Log.d(LOG_TAG,"respuesta autenticacion: "+responseStr);
 
         int responseCode = getResponseCode(responseStr);
 
         if (responseCode != 0)
-            return false;
+            return responseCode;
 
 
 
         String userToken = getUserToken(responseStr);
         if (userToken == null)
-            return false;
+            return -1;
 
         //obtener token de sesion
         Log.d(LOG_TAG,"intentando obtener token de sesion");
@@ -146,13 +146,16 @@ public abstract class BaseTask extends AsyncTask<Void, Void, Boolean> {
 
         String auth_session = getSessionToken(responseStr);
         if(auth_session == null)
-            return false;
+            return -1;
 
         Attorney attorney = new Attorney();
         attorney.setUsername(mParams.get(0).getValue());
         attorney.setPassword(mParams.get(1).getValue());
         attorney.setToken(auth_session);
-        return insertUpdate(attorney);
+        if(insertUpdate(attorney))
+            return 0;
+        else
+            return -1;
     }
 
     protected String getUserToken(String responseStr) {

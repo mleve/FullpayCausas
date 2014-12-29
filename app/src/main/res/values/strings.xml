@@ -15,6 +15,7 @@
     <string name="content_authority">cl.fullpay.causas</string>
     <string name="sync_account_type">causas.fullpay.cl</string>
     <string name="api_token">UHllWXRUcnB4MkZHZGp5UEFMclBhZEpm</string>
+    <string name="api_base_url">http://dev.empchile.net/forseti/index.php/admin/api</string>
     <string-array
         name="string_array_stages">
         <item>etapa 1</item>

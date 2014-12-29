@@ -152,7 +152,7 @@ public class Helper {
         return true;
     }
 
-    protected int getResponseCode(String rawResponse){
+    public int getResponseCode(String rawResponse){
         try {
             JSONObject response = new JSONObject(rawResponse);
             int responseCode = response.getInt("response");
@@ -160,8 +160,22 @@ public class Helper {
 
         } catch (JSONException e) {
             e.printStackTrace();
+            return -1;
         }
-        return -1;
+
+    }
+
+    public int getErrorCode(String rawResponse){
+        try {
+            JSONObject response = new JSONObject(rawResponse);
+            int responseCode = response.getInt("error");
+            return responseCode;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return -1;
+        }
+
     }
 
     protected boolean logInUser(ArrayList<NameValuePair> mParams){
@@ -196,7 +210,7 @@ public class Helper {
         return insertUpdate(attorney);
     }
 
-    private String getUserToken(String responseStr) {
+    public String getUserToken(String responseStr) {
         try {
             JSONObject aux = new JSONObject(responseStr);
             return aux.getString("user_token");
@@ -207,7 +221,7 @@ public class Helper {
         }
     }
 
-    private String getSessionToken(String responseStr) {
+    public String getSessionToken(String responseStr) {
         try{
             JSONObject aux = new JSONObject(responseStr);
             return aux.getString("auth_session");
@@ -220,9 +234,9 @@ public class Helper {
     }
 
 
-    private boolean insertUpdate(ParserInterface object){
+    public boolean insertUpdate(ParserInterface object){
         if(object.exists(mContext)){
-            //Ya existia este registro en la Bd, actualizar
+            //Ya existia este registro en la Bd, revisar si es necesario actualizar
             object.update(mContext);
         }
 
@@ -234,7 +248,7 @@ public class Helper {
 
     }
 
-    protected String httpGetRequest(String mUrl,ArrayList<NameValuePair> mParams){
+    public String httpGetRequest(String mUrl,ArrayList<NameValuePair> mParams){
 
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;

@@ -3,6 +3,7 @@ package cl.fullpay.causas.parsers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,7 +74,6 @@ public class Cause implements ParserInterface {
 
     @Override
     public void update(Context ctx) {
-
         ContentValues values = new ContentValues();
         values.put(CauseEntry.COLUMN_STAGE_KEY,stageId);
         values.put(CauseEntry.COLUMN_WARRANT,warrant);
@@ -87,12 +87,54 @@ public class Cause implements ParserInterface {
         values.put(CauseEntry.COLUMN_COURT_KEY,courtId);
         values.put(CauseEntry.COLUMN_ATTORNEY_KEY,attorneyId);
 
-        ctx.getContentResolver().update(
+        boolean hasChanged = hasChange(ctx,values);
+        if (hasChanged) {
+            ctx.getContentResolver().update(
+                    CauseEntry.CONTENT_URI,
+                    values,
+                    CauseEntry.COLUMN_CAUSE_ID + "= ?",
+                    new String[]{"" + accountId}
+            );
+        }
+
+    }
+
+    private boolean hasChange(Context ctx, ContentValues newValues) {
+        Cursor actualCause = ctx.getContentResolver().query(
                 CauseEntry.CONTENT_URI,
-                values,
-                CauseEntry.COLUMN_CAUSE_ID+"= ?",
-                new String[]{""+accountId}
+                null,
+                CauseEntry.COLUMN_CAUSE_ID+"="+accountId,
+                null,
+                null
         );
+        actualCause.moveToFirst();
+
+        String columnName, dbValue,serverValue;
+        for(int i=0; i<actualCause.getColumnCount();i++){
+            columnName = actualCause.getColumnName(i);
+            if(columnName.equals(CauseEntry._ID) ||
+                    columnName.equals(CauseEntry.COLUMN_CAUSE_ID) ||
+                    columnName.equals(CauseEntry.COLUMN_ATTORNEY_KEY) ||
+                    columnName.equals(CauseEntry.COLUMN_HAS_CHANGED)){
+                continue;
+            }
+            dbValue = actualCause.getString(i);
+            serverValue = newValues.getAsString(columnName);
+            //Log.d("Cause","valores para :"+columnName+" dbValue: "+dbValue+" serverValue: "+serverValue);
+            if(serverValue ==null){
+                if(dbValue != null){
+                    actualCause.close();
+                    return true;
+                }
+            }
+            else if(!serverValue.equals(dbValue)){
+                Log.d("Cause","hay valores distintos en col "+columnName+": "+dbValue+" y "+serverValue);
+                actualCause.close();
+                return true;
+            }
+        }
+        actualCause.close();
+        return false;
 
 
     }

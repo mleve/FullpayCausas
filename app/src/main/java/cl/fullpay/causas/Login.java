@@ -11,10 +11,12 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -25,10 +27,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -36,6 +48,8 @@ import java.util.Formatter;
 import java.util.List;
 
 import cl.fullpay.causas.AsyncTasks.BaseTask;
+import cl.fullpay.causas.parsers.Attorney;
+import cl.fullpay.causas.syncAdapter.Helper;
 
 /**
  * A login screen that offers login via email/password.
@@ -146,35 +160,90 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
 
 //            String mPassword = encryptPassword(password);
 
-            String token = "UHllWXRUcnB4MkZHZGp5UEFMclBhZEpm";
+            String token = getApplicationContext().getString(R.string.api_token);
 
             final ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             nameValuePairs.add(new BasicNameValuePair("username", username));
             nameValuePairs.add(new BasicNameValuePair("password", password));
             nameValuePairs.add(new BasicNameValuePair("token", token));
 
-            mAuthTask = new BaseTask(getApplicationContext()) {
+            AsyncTask loginTask = new AsyncTask() {
+
+
                 @Override
-                protected Boolean doInBackground(Void... voids) {
-                    return logInUser(nameValuePairs);
+                protected Object doInBackground(Object[] objects) {
+                    Helper helper = new Helper(getApplicationContext());
+
+                    String baseUrl = getApplicationContext().getString(R.string.api_base_url);
+                    String responseStr = helper.httpGetRequest(baseUrl + "/auth", nameValuePairs);
+
+                    Log.d(LOG_TAG,"respuesta autenticacion: "+responseStr);
+
+                    if(responseStr == null)
+                        return -1;
+
+                    int responseCode = helper.getResponseCode(responseStr);
+
+                    if (responseCode != 0)
+                        return helper.getErrorCode(responseStr);
+
+
+
+                    String userToken = helper.getUserToken(responseStr);
+                    if (userToken == null)
+                        return -1;
+
+                    //obtener token de sesion
+                    Log.d(LOG_TAG,"intentando obtener token de sesion");
+
+                    responseStr = helper.httpGetRequest(baseUrl + "/getAuthSession/" + userToken, null);
+
+
+                    String auth_session = helper.getSessionToken(responseStr);
+                    if(auth_session == null)
+                        return -1;
+
+                    Attorney attorney = new Attorney();
+                    attorney.setUsername(nameValuePairs.get(0).getValue());
+                    attorney.setPassword(nameValuePairs.get(1).getValue());
+                    attorney.setToken(auth_session);
+                    if(helper.insertUpdate(attorney))
+                        return 0;
+                    else
+                        return -1;
 
                 }
 
                 @Override
-                protected void onPostExecute(Boolean aBoolean) {
-                    super.onPostExecute(aBoolean);
-                    if (aBoolean) {
-                        startActivity(new Intent(getApplicationContext(), Main.class));
-                        finish();
-                    } else {
-                        mPasswordView.setError("Usuario o clave incorrecto");
-                        mPasswordView.requestFocus();
-                        return;
+                protected void onPostExecute(Object o) {
+                    super.onPostExecute(o);
+                    int result = (Integer) o;
+                    showProgress(false);
+                    switch (result){
+                        case -1:
+                            mPasswordView.setError("Ocurrio un error al comunicarse con el servidor," +
+                                    "reintente");
+                            mPasswordView.requestFocus();
+                            break;
+                        case 0:
+                            startActivity(new Intent(getApplicationContext(),Main.class));
+                            finish();
+                            break;
+                        case 20:
+                        case 21:
+                            mPasswordView.setError("Usuario o clave incorrecto");
+                            mPasswordView.requestFocus();
+                            break;
+                        default:
+                            mPasswordView.setError("ocurrio un error, reintente");
+                            mPasswordView.requestFocus();
+                            break;
                     }
                 }
             };
 
-            mAuthTask.execute();
+            loginTask.execute();
+
         }
     }
 
@@ -211,70 +280,7 @@ public class Login extends Activity implements LoaderCallbacks<Cursor>{
         return result;
     }
 
-    /*
-    private void processResponse(String response){
-        mAuthTask = null;
-        showProgress(false);
 
-        String toastMsg = "";
-
-        if (response == null){
-            toastMsg = "Ocurrio un error interno";
-        }
-        else {
-
-            try{
-                JSONObject responseObj = new JSONObject(response);
-                if(responseObj.getInt("response") == 0) {
-                    HttpGetTask sessionTask = new HttpGetTask(null,
-                            "http://dev.empchile.net/forseti/index.php/admin/api/getAuthSession/"+
-                            responseObj.getString("auth_token"),
-                            new HttpGetTask.OnPostExecuteListener() {
-                                @Override
-                                public void onPostExecute(String result) {
-                                    createAttorney(result);
-                                }
-                            });
-                    mAuthTask.execute((Void) null);
-                    //this.startActivity(new Intent(this, Init.class));
-                    return;
-                }
-                else{
-                    int error = responseObj.getInt("error");
-                    if(error == 10)
-                        toastMsg = "Token invalido";
-                    else if(error == 21){
-                        mPasswordView.setError("Usuario o clave incorrecto");
-                        mPasswordView.requestFocus();
-                        return;
-                    }
-
-
-                }
-            }catch(JSONException e){
-                toastMsg = "Ocurrio un error interno";
-                Log.d(LOG_TAG,"ni idea como llegue aqui: " + e);
-
-            }
-
-        }
-        Toast.makeText(this,toastMsg,Toast.LENGTH_LONG).show();
-    }
-
-    private void createAttorney(String result) {
-        ContentValues attorney = new ContentValues();
-        attorney.put(FullpayContract.AttorneyEntry.COLUMN_USERNAME,
-                mUsernameView.getText().toString());
-        attorney.put(FullpayContract.AttorneyEntry.COLUMN_PASSWORD,
-                mPasswordView.getText().toString());
-        try{
-            JSONObject aux = new JSONObject(result);
-            aux.getString("session_token");
-        }catch (Exception e){
-
-        }
-    }
- */
     private boolean isUsernameValid(String email) {
         return true;
     }
