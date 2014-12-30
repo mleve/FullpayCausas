@@ -14,7 +14,9 @@
     <string name="stage">escoger una</string>
     <string name="content_authority">cl.fullpay.causas</string>
     <string name="sync_account_type">causas.fullpay.cl</string>
+    <string name="search_title">rol</string>
     <string name="api_token">UHllWXRUcnB4MkZHZGp5UEFMclBhZEpm</string>
+    <string name="update">Sincronizar</string>
     <string name="api_base_url">http://dev.empchile.net/forseti/index.php/admin/api</string>
     <string-array
         name="string_array_stages">
