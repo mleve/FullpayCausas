@@ -311,7 +311,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Sincronizando", Toast.LENGTH_SHORT).show();
             SyncAdapter.syncImmediately(getActivity());
             return true;
         }
