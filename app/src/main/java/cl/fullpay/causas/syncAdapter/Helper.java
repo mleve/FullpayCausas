@@ -28,6 +28,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import cl.fullpay.causas.R;
+import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.data.FullpayContract.*;
 import cl.fullpay.causas.parsers.Attorney;
 import cl.fullpay.causas.parsers.Cause;
@@ -74,10 +75,10 @@ public class Helper {
                 cause.setAttorneyId(attorneyId);
                 String courtId;
                 Cursor CourtCursor = mContext.getContentResolver().query(
-                        CourtEntry.buildCourtWithName(obj.getString("tribunal")),
+                        FullpayContract.CourtEntry.CONTENT_URI,
                         null,
-                        null,
-                        null,
+                        FullpayContract.CourtEntry.COLUMN_NAME+"=?",
+                        new String[]{obj.getString("tribunal")},
                         null
                 );
                 if(CourtCursor.moveToFirst()){

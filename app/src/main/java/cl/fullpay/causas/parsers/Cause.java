@@ -31,6 +31,7 @@ public class Cause implements ParserInterface {
     private int stageId;
     private String stageDate;
     private String comments;
+    private String status;
     private int warrant;
     private int attorneyId;
 
@@ -69,6 +70,7 @@ public class Cause implements ParserInterface {
         formatter.applyPattern("dd-MM-yyyy");
         stageDate = formatter.format(date);
         comments = (obj.getString("observaciones").equals("null")) ? "" : obj.getString("observaciones");
+        status = obj.getString("estado_cuenta");
 
     }
 
@@ -141,6 +143,8 @@ public class Cause implements ParserInterface {
 
     @Override
     public void save(Context mContext) {
+        if(status.equals("Terminado"))
+            return;
         ContentValues values = new ContentValues();
         values.put(CauseEntry.COLUMN_CAUSE_ID,accountId);
         values.put(CauseEntry.COLUMN_STAGE_KEY,stageId);
@@ -165,6 +169,8 @@ public class Cause implements ParserInterface {
 
     @Override
     public boolean exists(Context ctx) {
+        if(status.equals("Terminado"))
+                return false;
         Cursor cursor = ctx.getContentResolver().query(
                 CauseEntry.CONTENT_URI,
                 null,

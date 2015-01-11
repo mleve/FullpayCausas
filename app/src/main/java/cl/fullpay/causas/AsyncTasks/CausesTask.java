@@ -88,10 +88,10 @@ public class CausesTask extends BaseTask{
                 cause.setAttorneyId(attorneyId);
                 String courtId;
                 Cursor CourtCursor = mContext.getContentResolver().query(
-                        FullpayContract.CourtEntry.buildCourtWithName(obj.getString("tribunal")),
+                        FullpayContract.CourtEntry.CONTENT_URI,
                         null,
-                        null,
-                        null,
+                        FullpayContract.CourtEntry.COLUMN_NAME+"=?",
+                        new String[]{obj.getString("tribunal")},
                         null
                 );
                 if(CourtCursor.moveToFirst()){

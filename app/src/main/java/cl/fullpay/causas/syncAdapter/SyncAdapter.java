@@ -51,7 +51,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle bundle, String s, ContentProviderClient contentProviderClient, SyncResult syncResult) {
-        //TODO realizar el envio de información al servidor antes de pedir sus datos
+
 
         Log.d(LOG_TAG,"hola, deberia estar sincronizando");
         String baseUrl = getContext().getString(R.string.api_base_url);
