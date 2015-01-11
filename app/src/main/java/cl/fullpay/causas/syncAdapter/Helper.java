@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import cl.fullpay.causas.R;
 import cl.fullpay.causas.data.FullpayContract.*;
 import cl.fullpay.causas.parsers.Attorney;
 import cl.fullpay.causas.parsers.Cause;
@@ -40,7 +41,6 @@ import cl.fullpay.causas.parsers.Stage;
 public class Helper {
     private Context mContext;
     private static final String LOG_TAG = Helper.class.getSimpleName();
-    protected String baseUrl = "http://dev.empchile.net/forseti/index.php/admin/api";
 
     public Helper(Context ctx){
         mContext = ctx;
@@ -178,8 +178,8 @@ public class Helper {
 
     }
 
-    protected boolean logInUser(ArrayList<NameValuePair> mParams){
-        String responseStr = httpGetRequest(baseUrl+"/auth",mParams);
+    protected boolean logInUser(String baseUrl, ArrayList<NameValuePair> mParams){
+        String responseStr = httpGetRequest(baseUrl +"/auth",mParams);
         Log.d(LOG_TAG,"respuesta autenticacion: "+responseStr);
 
         int responseCode = getResponseCode(responseStr);
@@ -196,10 +196,11 @@ public class Helper {
         //obtener token de sesion
         Log.d(LOG_TAG,"intentando obtener token de sesion");
 
-        responseStr = httpGetRequest(baseUrl+"/getAuthSession/"+userToken,null);
+        responseStr = httpGetRequest(baseUrl +"/getAuthSession/"+userToken,null);
 
 
         String auth_session = getSessionToken(responseStr);
+        Log.d(LOG_TAG,"token de session: "+auth_session);
         if(auth_session == null)
             return false;
 
@@ -394,6 +395,7 @@ public class Helper {
                 String.format("Se envian a guardar: id_cuenta: %s , id_etapa %s , fecha_etapa: %s , observaciones: %s ",
                         idCause,idStage,formatDate,comments)
             );
+        String baseUrl = mContext.getString(R.string.api_base_url);
         String responseStr = httpGetRequest(baseUrl+"/insertCausa/"+token,params);
 
         int responseCode = getResponseCode(responseStr);

@@ -27,7 +27,6 @@ import cl.fullpay.causas.syncAdapter.SyncAdapter;
  */
 public class Main extends Activity {
 
-    private String baseApiUrl  =  "http://dev.empchile.net/forseti/index.php/admin/api";
     private String token;
 
 

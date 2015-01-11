@@ -114,9 +114,7 @@ public class NavigationDrawerFragment extends Fragment {
         FullpayDbHelper dbHelper = new FullpayDbHelper(getActivity());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        //TODO agregar de alguna manera la opcion null "sin tribunal asignado"
 
-        //TODO traspasar la query al content provider
 
         String query = String.format(
                 "SELECT %s.%s, %s, %s " +

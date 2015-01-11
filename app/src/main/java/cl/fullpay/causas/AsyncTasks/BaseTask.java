@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 
+import cl.fullpay.causas.R;
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.parsers.Attorney;
 import cl.fullpay.causas.parsers.ParserInterface;
@@ -40,13 +41,14 @@ public abstract class BaseTask extends AsyncTask<Void, Void, Boolean> {
 
     private static String LOG_TAG = BaseTask.class.getSimpleName();
 
-    protected String baseUrl = "http://dev.empchile.net/forseti/index.php/admin/api";
+    protected String baseUrl;
 
     protected  Context mContext;
 
 
     protected BaseTask(Context ctx){
         mContext = ctx;
+        baseUrl = mContext.getString(R.string.api_base_url);
     }
 
     protected String httpGetRequest(String mUrl,ArrayList<NameValuePair> mParams){

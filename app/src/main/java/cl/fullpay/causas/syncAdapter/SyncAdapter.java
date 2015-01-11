@@ -54,7 +54,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         //TODO realizar el envio de información al servidor antes de pedir sus datos
 
         Log.d(LOG_TAG,"hola, deberia estar sincronizando");
-        String baseUrl = "http://dev.empchile.net/forseti/index.php/admin/api";
+        String baseUrl = getContext().getString(R.string.api_base_url);
 
         Cursor attorneyCursor = getContext().getContentResolver().query(
                 AttorneyEntry.CONTENT_URI,
@@ -89,7 +89,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         Helper helper = new Helper(getContext());
 
-        boolean login_result = helper.logInUser(nameValuePairs);
+        boolean login_result = helper.logInUser(baseUrl,nameValuePairs);
 
         if(!login_result) {
             Log.d(LOG_TAG,"fallo al tratar de logear al usuario");
@@ -177,7 +177,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     public static void syncImmediately(Context context) {
-        Log.d(LOG_TAG,"hola, me mandaron a sincronizar inmediatamente :(");
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
@@ -207,7 +206,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         /*
          * Since we've created an account
          */
-        Log.d(LOG_TAG,"callback de onAccountCreated");
         SyncAdapter.configurePeriodicSync(context, SYNC_INTERVAL, SYNC_FLEXTIME);
 
         /*

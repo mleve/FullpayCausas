@@ -71,7 +71,7 @@ public class CauseCursorAdapter  extends CursorAdapter{
                 cursor.getColumnIndex(CauseEntry.COLUMN_ROL_NUM)
         );
 
-        String rolDate= cursor.getString(
+        final String rolDate= cursor.getString(
                 cursor.getColumnIndex(CauseEntry.COLUMN_ROL_DATE)
         );
 
@@ -141,8 +141,16 @@ public class CauseCursorAdapter  extends CursorAdapter{
         //initStageSpinner(context);
         stageSpinner.setAdapter(stageSpinnerAdapter);
 
+
         if(!successors.equals("")){
-            stageSpinner.setSelection(0);
+            int actualStageId;
+            int i;
+            for(i=0;i<stageSpinnerAdapter.getCount();i++) {
+                actualStageId = ((Cursor) stageSpinnerAdapter.getItem(i)).getInt(0);
+                if(stage == actualStageId)
+                    break;
+            }
+            stageSpinner.setSelection(i);
         }
         else{
             stageSpinner.setSelection(stage-1);
@@ -154,7 +162,7 @@ public class CauseCursorAdapter  extends CursorAdapter{
                 if(!b){
                     String newComment = commentView.getText().toString();
                     if(!newComment.equals(comment)){
-                        saveComment(newComment, id, rolNum,context);
+                        saveComment(newComment, id, rolNum,context,rolDate);
                         updateDate(lastChangeView,id);
                     }
                 }
@@ -166,7 +174,7 @@ public class CauseCursorAdapter  extends CursorAdapter{
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long spinnerElemId) {
                 //Log.d(LOG_TAG,"spinner, i = "+i+" id= "+id+" , stage= "+stage);
                 if(stage != spinnerElemId) {
-                    saveStage(context, id, spinnerElemId);
+                    saveStage(context, id, spinnerElemId,rolNum,rolDate);
                     updateDate(lastChangeView,id);
                 }
             }
@@ -232,8 +240,8 @@ public class CauseCursorAdapter  extends CursorAdapter{
         lastChangeView.setText(newDate);
     }
 
-    private void saveComment(String newComment, long id, String rolNum, Context context) {
-        Log.d(LOG_TAG,"cambio la causa "+id+" ,rol: "+rolNum+" ,se comento: "+newComment);
+    private void saveComment(String newComment, long id, String rolNum, Context context, String rolDate) {
+        Log.d(LOG_TAG,"cambio la causa "+id+" ,rol: "+rolNum+"-"+rolDate+" ,se comento: "+newComment);
         ContentValues data = new ContentValues();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         String newDate = formatter.format(Calendar.getInstance().getTime());
@@ -249,8 +257,8 @@ public class CauseCursorAdapter  extends CursorAdapter{
 
     }
 
-    private void saveStage(Context context, long id, long newStageId) {
-        Log.d(LOG_TAG,"cambio la causa "+id+" , a nueva etapa: "+newStageId);
+    private void saveStage(Context context, long id, long newStageId, String rolNum, String rolDate) {
+        Log.d(LOG_TAG,"cambio la causa "+id+" rol: "+rolNum+"-"+rolDate+" , a nueva etapa: "+newStageId);
         ContentValues data = new ContentValues();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         String newDate = formatter.format(Calendar.getInstance().getTime());
