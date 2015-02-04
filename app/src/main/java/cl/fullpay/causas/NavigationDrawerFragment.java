@@ -4,7 +4,8 @@ package cl.fullpay.causas;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
-import android.app.FragmentManager;
+import android.app.SearchManager;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -22,8 +23,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
@@ -38,7 +39,7 @@ import cl.fullpay.causas.syncAdapter.SyncAdapter;
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
-public class NavigationDrawerFragment extends Fragment {
+public class NavigationDrawerFragment extends Fragment{
 
     private static final String LOG_TAG = NavigationDrawerFragment.class.getSimpleName();
 
@@ -299,6 +300,13 @@ public class NavigationDrawerFragment extends Fragment {
             inflater.inflate(R.menu.global, menu);
             showGlobalContextActionBar();
         }
+
+        SearchManager searchManager =
+                (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getActivity().getComponentName()));
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -331,7 +339,6 @@ public class NavigationDrawerFragment extends Fragment {
     private ActionBar getActionBar() {
         return getActivity().getActionBar();
     }
-
 
     /**
      * Callbacks interface that all activities using this fragment must implement.
