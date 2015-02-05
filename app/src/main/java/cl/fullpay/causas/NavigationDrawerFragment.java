@@ -32,6 +32,7 @@ import android.widget.Toast;
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.data.FullpayContract.CauseEntry;
 import cl.fullpay.causas.data.FullpayDbHelper;
+import cl.fullpay.causas.syncAdapter.Helper;
 import cl.fullpay.causas.syncAdapter.SyncAdapter;
 
 /**
@@ -112,6 +113,7 @@ public class NavigationDrawerFragment extends Fragment{
             }
         });
 
+        /*
         FullpayDbHelper dbHelper = new FullpayDbHelper(getActivity());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
@@ -136,10 +138,9 @@ public class NavigationDrawerFragment extends Fragment{
         );
         Log.d(LOG_TAG, "query para courts: "+query);
 
-        Cursor courtCursor = db.rawQuery(
-                query,
-                null
-        );
+*/
+        Helper helper = new Helper(getActivity());
+        Cursor courtCursor = helper.getCourtsForAttorney();
 
 
         SimpleCursorAdapter causesAdapter = new SimpleCursorAdapter(

@@ -3,6 +3,7 @@ package cl.fullpay.causas.syncAdapter;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
@@ -30,6 +31,7 @@ import java.util.Date;
 import cl.fullpay.causas.R;
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.data.FullpayContract.*;
+import cl.fullpay.causas.data.FullpayDbHelper;
 import cl.fullpay.causas.parsers.Attorney;
 import cl.fullpay.causas.parsers.Cause;
 import cl.fullpay.causas.parsers.Court;
@@ -403,5 +405,34 @@ public class Helper {
 
         if (responseCode != 0)
             Log.d(LOG_TAG,"fallo al enviar causa: "+idCause+" response: "+responseStr);
+    }
+
+    public Cursor getCourtsForAttorney(){
+        FullpayDbHelper dbHelper = new FullpayDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        String query = String.format(
+                "SELECT %s.%s, %s, %s " +
+                        "FROM %s, %s " +
+                        "WHERE %s.%s = %s.%s " +
+                        "GROUP BY %s",
+                CauseEntry.TABLE_NAME,
+                CauseEntry._ID,
+                CauseEntry.COLUMN_COURT_KEY,
+                FullpayContract.CourtEntry.COLUMN_NAME,
+                CauseEntry.TABLE_NAME,
+                FullpayContract.CourtEntry.TABLE_NAME,
+                CauseEntry.TABLE_NAME,
+                CauseEntry.COLUMN_COURT_KEY,
+                FullpayContract.CourtEntry.TABLE_NAME,
+                FullpayContract.CourtEntry._ID,
+                CauseEntry.COLUMN_COURT_KEY
+        );
+        Log.d(LOG_TAG, "query para courts: "+query);
+
+        return db.rawQuery(
+                query,
+                null
+        );
     }
 }

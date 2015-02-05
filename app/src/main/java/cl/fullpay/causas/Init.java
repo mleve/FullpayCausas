@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import cl.fullpay.causas.data.FullpayContract;
+import cl.fullpay.causas.syncAdapter.Helper;
 
 
 public class Init extends Activity
@@ -65,29 +66,28 @@ public class Init extends Activity
 
     private void handleIntent(Intent intent) {
         if(Intent.ACTION_SEARCH.equals(intent.getAction())){
-            Log.d("init.java", "mTitle es:" + mTitle);
             String query = intent.getStringExtra(SearchManager.QUERY);
             Toast.makeText(this,"buscando: "+query,Toast.LENGTH_LONG).show();
             Bundle bundle = new Bundle();
             bundle.putString(CauseListFragment.QUERY_ROL,query);
             Fragment causeList = new CauseListFragment();
             causeList.setArguments(bundle);
+            SharedPreferences settings = getPreferences(0);
+            String court = settings.getString(CauseListFragment.COURT_NAME_BUNDLE,"");
+            mTitle = "Resultado de busqueda para: "+query+" en corte: "+court;
+
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.container,causeList)
                     .commit();
 
-            SharedPreferences settings = getPreferences(0);
-            String corte = settings.getString(CauseListFragment.QUERY_COURT_NAME,"");
-            mTitle = "Resultado de busqueda para: "+query+" en corte: "+corte;
+
         }
     }
 
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
-
 
         String courtName = null;
 
@@ -100,14 +100,29 @@ public class Init extends Activity
 
         Fragment causeList = new CauseListFragment();
 
-        if(courtName != null){
-            Bundle bundle = new Bundle();
-            bundle.putString(CauseListFragment.COURT_NAME_BUNDLE,courtName);
-            causeList.setArguments(bundle);
-            mTitle = courtName;
+        /* Si no se ha seleccionado corte (primer uso o apertura de aplicacion luego de cerrarla)
+         recuperar la ultima corte que se selecciono (guardada en preferences), si no hay, escoger
+         primera corte del listado (primer uso de la aplicacion)
+        * */
 
+        SharedPreferences prefs = getPreferences(0);
+        if(courtName == null){
+            courtName =prefs.getString(CauseListFragment.COURT_NAME_BUNDLE,"-1");
+            if(courtName.equals("-1")){
+                //Primer uso de la app
+                Helper helper = new Helper(getApplicationContext());
+                Cursor cursor = helper.getCourtsForAttorney();
+                cursor.moveToFirst();
+                courtName= cursor.getString(2);
+                cursor.close();
+
+            }
         }
-
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(CauseListFragment.COURT_NAME_BUNDLE,courtName);
+        editor.commit();
+        mTitle = "Tribunal: "+courtName;
+        restoreActionBar();
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, causeList)

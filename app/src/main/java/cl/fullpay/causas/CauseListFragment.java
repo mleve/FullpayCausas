@@ -69,32 +69,15 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
         View rootView = inflater.inflate(R.layout.fragment_cause_list_2, container, false);
 
 
-        if(getArguments() != null){
+        SharedPreferences prefs = getActivity().getPreferences(0);
+        courtName = prefs.getString(COURT_NAME_BUNDLE,"-1");
+
+        if(getArguments()!=null){
             if(getArguments().containsKey(QUERY_ROL)){
                 isSearch = true;
                 query = getArguments().getString(QUERY_ROL);
             }
-            else if (getArguments().containsKey(COURT_NAME_BUNDLE)){
-                courtName = getArguments().getString(COURT_NAME_BUNDLE);
-                SharedPreferences settings = getActivity().getPreferences(0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString(QUERY_COURT_NAME,courtName);
-                editor.commit();
-            }
         }
-        else{
-
-            getCourtName();
-            /*
-            SharedPreferences settings = getActivity().getPreferences(0);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString(QUERY_COURT_NAME,courtName);
-            editor.commit();
-            */
-        }
-
-
-        //Cursor mCursor = buildCausesCursor(courtName);
 
         causesAdapter = new CauseCursorAdapter(
                 getActivity(),
@@ -148,21 +131,19 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Uri causesUri = FullpayContract.CauseEntry.CONTENT_URI;
-        SharedPreferences settings = getActivity().getPreferences(0);
-        String court = settings.getString(QUERY_COURT_NAME,"");
 
         Cursor courtCursor = getActivity().getContentResolver().query(
                 FullpayContract.CourtEntry.CONTENT_URI,
                 null,
                 FullpayContract.CourtEntry.COLUMN_NAME+"= ? ",
-                new String[]{court},
+                new String[]{courtName},
                 null
         );
         courtCursor.moveToFirst();
         String courtId = courtCursor.getString(
                 courtCursor.getColumnIndex(FullpayContract.CourtEntry._ID)
         );
-        Log.d(LOG_TAG,"court name : "+court+", court id: "+courtId);
+        Log.d(LOG_TAG,"court name : "+courtName+", court id: "+courtId);
         courtCursor.close();
         if (isSearch){
             return new CursorLoader(
