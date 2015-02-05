@@ -5,6 +5,7 @@ package cl.fullpay.causas;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -40,11 +41,15 @@ import cl.fullpay.causas.syncAdapter.SyncAdapter;
 public class CauseListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String COURT_NAME_BUNDLE = "bundle_court_name";
+    public static final String QUERY_ROL = "bundle_query_rol";
+    public static final String QUERY_COURT_NAME = "query_court";
 
     private final String LOG_TAG = CauseListFragment.class.getSimpleName();
     private CauseCursorAdapter causesAdapter;
     private static final int CAUSES_LOADER = 0;
     private String courtName;
+    private String query;
+    private boolean isSearch= false;
     private HttpGetTask getCauseTask;
 
     public CauseListFragment() {
@@ -65,42 +70,29 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
 
 
         if(getArguments() != null){
-            courtName = getArguments().getString(COURT_NAME_BUNDLE);
-
+            if(getArguments().containsKey(QUERY_ROL)){
+                isSearch = true;
+                query = getArguments().getString(QUERY_ROL);
+            }
+            else if (getArguments().containsKey(COURT_NAME_BUNDLE)){
+                courtName = getArguments().getString(COURT_NAME_BUNDLE);
+                SharedPreferences settings = getActivity().getPreferences(0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString(QUERY_COURT_NAME,courtName);
+                editor.commit();
+            }
         }
         else{
 
-            FullpayDbHelper dbHelper = new FullpayDbHelper(getActivity());
-            SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-            String query = String.format(
-                    "SELECT %s.%s, %s, %s " +
-                            "FROM %s, %s " +
-                            "WHERE %s.%s = %s.%s " +
-                            "GROUP BY %s",
-                    CauseEntry.TABLE_NAME,
-                    CauseEntry._ID,
-                    CauseEntry.COLUMN_COURT_KEY,
-                    FullpayContract.CourtEntry.COLUMN_NAME,
-                    CauseEntry.TABLE_NAME,
-                    FullpayContract.CourtEntry.TABLE_NAME,
-                    CauseEntry.TABLE_NAME,
-                    CauseEntry.COLUMN_COURT_KEY,
-                    FullpayContract.CourtEntry.TABLE_NAME,
-                    FullpayContract.CourtEntry._ID,
-                    CauseEntry.COLUMN_COURT_KEY
-            );
-
-            Cursor courtCursor = db.rawQuery(
-                    query,
-                    null
-            );
-
-            courtCursor.moveToFirst();
-            courtName= courtCursor.getString(2);
-            courtCursor.close();
-            db.close();
+            getCourtName();
+            /*
+            SharedPreferences settings = getActivity().getPreferences(0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(QUERY_COURT_NAME,courtName);
+            editor.commit();
+            */
         }
+
 
         //Cursor mCursor = buildCausesCursor(courtName);
 
@@ -120,94 +112,70 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
 
 
 
-    private Cursor buildCausesCursor(String courtName) {
+    private void getCourtName(){
+        FullpayDbHelper dbHelper = new FullpayDbHelper(getActivity());
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        if(courtName == null) {
-            return  getActivity().getContentResolver().query(
-                    CauseEntry.CONTENT_URI,
-                    null,
-                    null,
-                    null,
-                    CauseEntry.COLUMN_ROL_DATE + " ASC, " + CauseEntry.COLUMN_ROL_NUM + " ASC"
-            );
-        }else{
-            Cursor courtCursor = getActivity().getContentResolver().query(
-                    FullpayContract.CourtEntry.CONTENT_URI,
-                    null,
-                    FullpayContract.CourtEntry.COLUMN_NAME+"= ? ",
-                    new String[]{courtName},
-                    null
-            );
+        String query = String.format(
+                "SELECT %s.%s, %s, %s " +
+                        "FROM %s, %s " +
+                        "WHERE %s.%s = %s.%s " +
+                        "GROUP BY %s",
+                CauseEntry.TABLE_NAME,
+                CauseEntry._ID,
+                CauseEntry.COLUMN_COURT_KEY,
+                FullpayContract.CourtEntry.COLUMN_NAME,
+                CauseEntry.TABLE_NAME,
+                FullpayContract.CourtEntry.TABLE_NAME,
+                CauseEntry.TABLE_NAME,
+                CauseEntry.COLUMN_COURT_KEY,
+                FullpayContract.CourtEntry.TABLE_NAME,
+                FullpayContract.CourtEntry._ID,
+                CauseEntry.COLUMN_COURT_KEY
+        );
 
-            courtCursor.moveToFirst();
-            String courtId = courtCursor.getString(
-                    courtCursor.getColumnIndex(FullpayContract.CourtEntry._ID)
-            );
-            return  getActivity().getContentResolver().query(
-                    CauseEntry.CONTENT_URI,
-                    null,
-                    CauseEntry.COLUMN_COURT_KEY+"= ?",
-                    new String[]{courtId},
-                    CauseEntry.COLUMN_ROL_DATE + " ASC, " + CauseEntry.COLUMN_ROL_NUM + " ASC"
-            );
-
-        }
-
-    }
-
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Uri causesUri = FullpayContract.CauseEntry.CONTENT_URI;
-        Cursor courtCursor = getActivity().getContentResolver().query(
-                FullpayContract.CourtEntry.CONTENT_URI,
-                null,
-                FullpayContract.CourtEntry.COLUMN_NAME+"= ? ",
-                new String[]{courtName},
+        Cursor courtCursor = db.rawQuery(
+                query,
                 null
         );
 
         courtCursor.moveToFirst();
+        courtName= courtCursor.getString(2);
+        courtCursor.close();
+        db.close();
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        Uri causesUri = FullpayContract.CauseEntry.CONTENT_URI;
+        SharedPreferences settings = getActivity().getPreferences(0);
+        String court = settings.getString(QUERY_COURT_NAME,"");
+
+        Cursor courtCursor = getActivity().getContentResolver().query(
+                FullpayContract.CourtEntry.CONTENT_URI,
+                null,
+                FullpayContract.CourtEntry.COLUMN_NAME+"= ? ",
+                new String[]{court},
+                null
+        );
+        courtCursor.moveToFirst();
         String courtId = courtCursor.getString(
                 courtCursor.getColumnIndex(FullpayContract.CourtEntry._ID)
         );
+        Log.d(LOG_TAG,"court name : "+court+", court id: "+courtId);
         courtCursor.close();
-
-        return  new CursorLoader(
-                getActivity(),
-                causesUri,
-                null,
-                CauseEntry.COLUMN_COURT_KEY+"= ?",
-                new String[]{courtId},
-                CauseEntry.COLUMN_ROL_DATE + " ASC, " + CauseEntry.COLUMN_ROL_NUM + " ASC"
-        );
-
-
-        /*
-        if(courtName == null) {
+        if (isSearch){
             return new CursorLoader(
                     getActivity(),
                     causesUri,
                     null,
-                    null,
-                    null,
+                    CauseEntry.COLUMN_COURT_KEY+"=? AND "+
+                    CauseEntry.COLUMN_ROL_NUM+" LIKE '"+query+"%'",
+                    new String[]{courtId},
                     CauseEntry.COLUMN_ROL_DATE + " ASC, " + CauseEntry.COLUMN_ROL_NUM + " ASC"
             );
-        }else{
-            Cursor courtCursor = getActivity().getContentResolver().query(
-                    FullpayContract.CourtEntry.CONTENT_URI,
-                    null,
-                    FullpayContract.CourtEntry.COLUMN_NAME+"= ? ",
-                    new String[]{courtName},
-                    null
-            );
-
-            courtCursor.moveToFirst();
-            String courtId = courtCursor.getString(
-                    courtCursor.getColumnIndex(FullpayContract.CourtEntry._ID)
-            );
-            courtCursor.close();
-
+        }
+        else{
             return  new CursorLoader(
                     getActivity(),
                     causesUri,
@@ -216,9 +184,7 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
                     new String[]{courtId},
                     CauseEntry.COLUMN_ROL_DATE + " ASC, " + CauseEntry.COLUMN_ROL_NUM + " ASC"
             );
-
         }
-        */
 
     }
 

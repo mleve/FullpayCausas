@@ -300,13 +300,6 @@ public class NavigationDrawerFragment extends Fragment{
             inflater.inflate(R.menu.global, menu);
             showGlobalContextActionBar();
         }
-
-        SearchManager searchManager =
-                (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getActivity().getComponentName()));
         super.onCreateOptionsMenu(menu, inflater);
     }
 

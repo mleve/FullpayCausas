@@ -5,11 +5,14 @@ import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,7 +21,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
+import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import cl.fullpay.causas.data.FullpayContract;
 
@@ -51,9 +56,31 @@ public class Init extends Activity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
+        handleIntent(getIntent());
 
 
 
+
+    }
+
+    private void handleIntent(Intent intent) {
+        if(Intent.ACTION_SEARCH.equals(intent.getAction())){
+            Log.d("init.java", "mTitle es:" + mTitle);
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            Toast.makeText(this,"buscando: "+query,Toast.LENGTH_LONG).show();
+            Bundle bundle = new Bundle();
+            bundle.putString(CauseListFragment.QUERY_ROL,query);
+            Fragment causeList = new CauseListFragment();
+            causeList.setArguments(bundle);
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container,causeList)
+                    .commit();
+
+            SharedPreferences settings = getPreferences(0);
+            String corte = settings.getString(CauseListFragment.QUERY_COURT_NAME,"");
+            mTitle = "Resultado de busqueda para: "+query+" en corte: "+corte;
+        }
     }
 
 
@@ -78,12 +105,14 @@ public class Init extends Activity
             bundle.putString(CauseListFragment.COURT_NAME_BUNDLE,courtName);
             causeList.setArguments(bundle);
             mTitle = courtName;
+
         }
 
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, causeList)
                 .commit();
+
 
     }
 
@@ -102,6 +131,12 @@ public class Init extends Activity
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.init, menu);
+            SearchManager searchManager =
+                    (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+            searchView.setSearchableInfo(
+                    searchManager.getSearchableInfo(getComponentName()));
             restoreActionBar();
             return true;
         }
