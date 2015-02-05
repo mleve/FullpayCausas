@@ -42,7 +42,6 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
 
     public static final String COURT_NAME_BUNDLE = "bundle_court_name";
     public static final String QUERY_ROL = "bundle_query_rol";
-    public static final String QUERY_COURT_NAME = "query_court";
 
     private final String LOG_TAG = CauseListFragment.class.getSimpleName();
     private CauseCursorAdapter causesAdapter;
@@ -50,7 +49,6 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
     private String courtName;
     private String query;
     private boolean isSearch= false;
-    private HttpGetTask getCauseTask;
 
     public CauseListFragment() {
         // Required empty public constructor
@@ -91,41 +89,6 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
         return rootView;
 
 
-    }
-
-
-
-    private void getCourtName(){
-        FullpayDbHelper dbHelper = new FullpayDbHelper(getActivity());
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        String query = String.format(
-                "SELECT %s.%s, %s, %s " +
-                        "FROM %s, %s " +
-                        "WHERE %s.%s = %s.%s " +
-                        "GROUP BY %s",
-                CauseEntry.TABLE_NAME,
-                CauseEntry._ID,
-                CauseEntry.COLUMN_COURT_KEY,
-                FullpayContract.CourtEntry.COLUMN_NAME,
-                CauseEntry.TABLE_NAME,
-                FullpayContract.CourtEntry.TABLE_NAME,
-                CauseEntry.TABLE_NAME,
-                CauseEntry.COLUMN_COURT_KEY,
-                FullpayContract.CourtEntry.TABLE_NAME,
-                FullpayContract.CourtEntry._ID,
-                CauseEntry.COLUMN_COURT_KEY
-        );
-
-        Cursor courtCursor = db.rawQuery(
-                query,
-                null
-        );
-
-        courtCursor.moveToFirst();
-        courtName= courtCursor.getString(2);
-        courtCursor.close();
-        db.close();
     }
 
     @Override

@@ -50,7 +50,22 @@ public class Init extends Activity
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
+
+        String courtName;
+        SharedPreferences prefs = getPreferences(0);
+        courtName =prefs.getString(CauseListFragment.COURT_NAME_BUNDLE,"-1");
+        if(courtName.equals("-1")){
+            //Primer uso de la app
+            Helper helper = new Helper(getApplicationContext());
+            Cursor cursor = helper.getCourtsForAttorney();
+            cursor.moveToFirst();
+            courtName= cursor.getString(2);
+            cursor.close();
+        }
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(CauseListFragment.COURT_NAME_BUNDLE,courtName);
+        editor.commit();
+        mTitle = "Tribunal: "+courtName;
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
@@ -74,7 +89,7 @@ public class Init extends Activity
             causeList.setArguments(bundle);
             SharedPreferences settings = getPreferences(0);
             String court = settings.getString(CauseListFragment.COURT_NAME_BUNDLE,"");
-            mTitle = "Resultado de busqueda para: "+query+" en corte: "+court;
+            mTitle = "Resultado de busqueda para: "+query+" en tribunal: "+court;
 
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction()
@@ -108,21 +123,11 @@ public class Init extends Activity
         SharedPreferences prefs = getPreferences(0);
         if(courtName == null){
             courtName =prefs.getString(CauseListFragment.COURT_NAME_BUNDLE,"-1");
-            if(courtName.equals("-1")){
-                //Primer uso de la app
-                Helper helper = new Helper(getApplicationContext());
-                Cursor cursor = helper.getCourtsForAttorney();
-                cursor.moveToFirst();
-                courtName= cursor.getString(2);
-                cursor.close();
-
-            }
         }
+
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(CauseListFragment.COURT_NAME_BUNDLE,courtName);
         editor.commit();
-        mTitle = "Tribunal: "+courtName;
-        restoreActionBar();
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, causeList)
@@ -164,7 +169,6 @@ public class Init extends Activity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
 
-        //TODO implementar campo de busqueda por rol
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
