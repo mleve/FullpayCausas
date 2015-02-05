@@ -125,6 +125,8 @@ public class Init extends Activity
             courtName =prefs.getString(CauseListFragment.COURT_NAME_BUNDLE,"-1");
         }
 
+        mTitle = "Tribunal: "+courtName;
+
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(CauseListFragment.COURT_NAME_BUNDLE,courtName);
         editor.commit();
