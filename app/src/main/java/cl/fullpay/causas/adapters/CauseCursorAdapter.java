@@ -227,6 +227,8 @@ public class CauseCursorAdapter  extends CursorAdapter{
                 0
         );
 
+        stageAdapter.setDropDownViewResource(R.layout.stage_dropdown_view_item);
+
         return stageAdapter;
 
 

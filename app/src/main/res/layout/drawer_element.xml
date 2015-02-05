@@ -6,9 +6,11 @@
 
     <TextView
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="35dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Medium Text"
         android:gravity="center"
-        android:id="@+id/drawer_item_text" />
+        android:textSize="25dp"
+        android:id="@+id/drawer_item_text"
+        android:textIsSelectable="false" />
 </LinearLayout>

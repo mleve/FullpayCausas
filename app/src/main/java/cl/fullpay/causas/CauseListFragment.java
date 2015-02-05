@@ -82,6 +82,7 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
                 null, //mCursor,
                 0
         );
+
         ListView causeList = (ListView) rootView.findViewById(R.id.listview_cause);
         causeList.setAdapter(causesAdapter);
 
