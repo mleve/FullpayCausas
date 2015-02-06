@@ -66,7 +66,7 @@ public class NavigationDrawerFragment extends Fragment{
     private ActionBarDrawerToggle mDrawerToggle;
 
     private DrawerLayout mDrawerLayout;
-    private ListView mDrawerListView;
+    public ListView mDrawerListView;
     private View mFragmentContainerView;
 
     private int mCurrentSelectedPosition = 0;
@@ -106,12 +106,6 @@ public class NavigationDrawerFragment extends Fragment{
             Bundle savedInstanceState) {
         mDrawerListView = (ListView) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
-        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectItem(position);
-            }
-        });
 
         Helper helper = new Helper(getActivity());
         Cursor courtCursor = helper.getCourtsForAttorney();
@@ -136,7 +130,12 @@ public class NavigationDrawerFragment extends Fragment{
         );
 
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-
+        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectItem(position);
+            }
+        });
         return mDrawerListView;
     }
 

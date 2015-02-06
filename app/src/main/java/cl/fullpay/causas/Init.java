@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -107,9 +109,9 @@ public class Init extends Activity
         String courtName = null;
 
         if(mNavigationDrawerFragment != null){
-            View element =  mNavigationDrawerFragment.getSelectedView(position);
-            TextView courtNameView=(TextView) element.findViewById(R.id.drawer_item_text);
-            courtName = courtNameView.getText().toString();
+            ListView lw = mNavigationDrawerFragment.mDrawerListView;
+            SQLiteCursor cursor = (SQLiteCursor)lw.getItemAtPosition(position);
+            courtName = cursor.getString(2);
         }
 
 
