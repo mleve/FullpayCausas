@@ -1,25 +1,13 @@
 package cl.fullpay.causas;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
-import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
 
 import cl.fullpay.causas.AsyncTasks.CausesTask;
-import cl.fullpay.causas.HttpTasks.HttpGetTask;
 import cl.fullpay.causas.data.FullpayContract;
-import cl.fullpay.causas.data.FullpayProvider;
 import cl.fullpay.causas.syncAdapter.SyncAdapter;
 
 /**

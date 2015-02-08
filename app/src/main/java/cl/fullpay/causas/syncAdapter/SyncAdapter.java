@@ -53,7 +53,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle bundle, String s, ContentProviderClient contentProviderClient, SyncResult syncResult) {
 
 
-        Log.d(LOG_TAG,"hola, deberia estar sincronizando");
         String baseUrl = getContext().getString(R.string.api_base_url);
 
         Cursor attorneyCursor = getContext().getContentResolver().query(
@@ -78,7 +77,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             );
         }
         else{
-            Log.d(LOG_TAG,"fallo al obtener el token desde la bd");
+            //Log.d(LOG_TAG,"fallo al obtener el token desde la bd");
             return;
         }
         nameValuePairs.add(new BasicNameValuePair("username", username));
@@ -92,7 +91,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         boolean login_result = helper.logInUser(baseUrl,nameValuePairs);
 
         if(!login_result) {
-            Log.d(LOG_TAG,"fallo al tratar de logear al usuario");
+            //Log.d(LOG_TAG,"fallo al tratar de logear al usuario");
             return;
         }
 
@@ -105,7 +104,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         int responseCode = helper.getResponseCode(responseStr);
 
         if (responseCode != 0){
-            Log.d(LOG_TAG,"la carga de etapas fallo");
+            //Log.d(LOG_TAG,"la carga de etapas fallo");
             return;
         }
 
@@ -116,14 +115,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         responseCode = helper.getResponseCode(responseStr);
 
         if (responseCode != 0) {
-            Log.d(LOG_TAG,"la carga de stages fallo");
+            //Log.d(LOG_TAG,"la carga de stages fallo");
             return;
         }
 
 
 
         if(token == null){
-            Log.d(LOG_TAG,"error interno al tratar de obtener el session_token de la db");
+            //Log.d(LOG_TAG,"error interno al tratar de obtener el session_token de la db");
         }
 
         helper.createCourts(responseStr);
@@ -134,7 +133,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         responseCode = helper.getResponseCode(responseStr);
 
         if (responseCode != 0) {
-            Log.d(LOG_TAG,"fallo al obtener las causas");
+            //Log.d(LOG_TAG,"fallo al obtener las causas");
             return;
         }
 

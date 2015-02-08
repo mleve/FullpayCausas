@@ -130,7 +130,7 @@ public class Cause implements ParserInterface {
                 }
             }
             else if(!serverValue.equals(dbValue)){
-                Log.d("Cause","hay valores distintos en col "+columnName+": "+dbValue+" y "+serverValue);
+                //Log.d("Cause","hay valores distintos en col "+columnName+": "+dbValue+" y "+serverValue);
                 actualCause.close();
                 return true;
             }

@@ -23,7 +23,7 @@ public class SyncService extends Service {
 
     @Override
     public void onCreate() {
-        Log.d(LOG_TAG, "onCreate - " + LOG_TAG);
+        //Log.d(LOG_TAG, "onCreate - " + LOG_TAG);
         synchronized (sSyncAdapterLock) {
             if (sSyncAdapter == null) {
                 sSyncAdapter = new SyncAdapter(getApplicationContext(), true);

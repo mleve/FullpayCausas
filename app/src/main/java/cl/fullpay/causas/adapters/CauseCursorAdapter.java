@@ -199,7 +199,7 @@ public class CauseCursorAdapter  extends CursorAdapter{
             for(String code : stageCodes){
                 whereStatement = whereStatement+" OR "+StageEntry.COLUMN_CODE+"='"+code+"'";
             }
-            Log.d(LOG_TAG,"where Statement: "+whereStatement);
+            //Log.d(LOG_TAG,"where Statement: "+whereStatement);
             stageCursor = context.getContentResolver().query(
                     StageEntry.CONTENT_URI,
                     null,
@@ -243,7 +243,7 @@ public class CauseCursorAdapter  extends CursorAdapter{
     }
 
     private void saveComment(String newComment, long id, String rolNum, Context context, String rolDate) {
-        Log.d(LOG_TAG,"cambio la causa "+id+" ,rol: "+rolNum+"-"+rolDate+" ,se comento: "+newComment);
+        //Log.d(LOG_TAG,"cambio la causa "+id+" ,rol: "+rolNum+"-"+rolDate+" ,se comento: "+newComment);
         ContentValues data = new ContentValues();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         String newDate = formatter.format(Calendar.getInstance().getTime());
@@ -260,7 +260,7 @@ public class CauseCursorAdapter  extends CursorAdapter{
     }
 
     private void saveStage(Context context, long id, long newStageId, String rolNum, String rolDate) {
-        Log.d(LOG_TAG,"cambio la causa "+id+" rol: "+rolNum+"-"+rolDate+" , a nueva etapa: "+newStageId);
+        //Log.d(LOG_TAG,"cambio la causa "+id+" rol: "+rolNum+"-"+rolDate+" , a nueva etapa: "+newStageId);
         ContentValues data = new ContentValues();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         String newDate = formatter.format(Calendar.getInstance().getTime());

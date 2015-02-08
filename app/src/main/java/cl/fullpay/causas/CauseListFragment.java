@@ -7,31 +7,18 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.Spinner;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Collections;
-
-import cl.fullpay.causas.HttpTasks.HttpGetTask;
 import cl.fullpay.causas.adapters.CauseCursorAdapter;
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.data.FullpayContract.CauseEntry;
-import cl.fullpay.causas.data.FullpayDbHelper;
-import cl.fullpay.causas.syncAdapter.SyncAdapter;
 
 
 /**
@@ -107,7 +94,7 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
         String courtId = courtCursor.getString(
                 courtCursor.getColumnIndex(FullpayContract.CourtEntry._ID)
         );
-        Log.d(LOG_TAG,"court name : "+courtName+", court id: "+courtId);
+        //Log.d(LOG_TAG,"court name : "+courtName+", court id: "+courtId);
         courtCursor.close();
         if (isSearch){
             return new CursorLoader(
