@@ -143,43 +143,45 @@ public class Cause implements ParserInterface {
 
     @Override
     public void save(Context mContext) {
-        if(status.equals("Terminado"))
-            return;
-        ContentValues values = new ContentValues();
-        values.put(CauseEntry.COLUMN_CAUSE_ID,accountId);
-        values.put(CauseEntry.COLUMN_STAGE_KEY,stageId);
-        values.put(CauseEntry.COLUMN_WARRANT,warrant);
-        values.put(CauseEntry.COLUMN_ROL_NUM,rolNum);
-        values.put(CauseEntry.COLUMN_RUT,rut);
-        values.put(CauseEntry.COLUMN_ROL_DATE,rolDate);
-        values.put(CauseEntry.COLUMN_NAMES,names);
-        values.put(CauseEntry.COLUMN_LAST_NAME,lastName);
-        values.put(CauseEntry.COLUMN_CHANGE_DATE,stageDate);
-        values.put(CauseEntry.COLUMN_COMMENT,comments);
-        values.put(CauseEntry.COLUMN_ATTORNEY_KEY,attorneyId);
-        values.put(CauseEntry.COLUMN_COURT_KEY,courtId);
+        if(status.equals("Vigente")) {
+            ContentValues values = new ContentValues();
+            values.put(CauseEntry.COLUMN_CAUSE_ID, accountId);
+            values.put(CauseEntry.COLUMN_STAGE_KEY, stageId);
+            values.put(CauseEntry.COLUMN_WARRANT, warrant);
+            values.put(CauseEntry.COLUMN_ROL_NUM, rolNum);
+            values.put(CauseEntry.COLUMN_RUT, rut);
+            values.put(CauseEntry.COLUMN_ROL_DATE, rolDate);
+            values.put(CauseEntry.COLUMN_NAMES, names);
+            values.put(CauseEntry.COLUMN_LAST_NAME, lastName);
+            values.put(CauseEntry.COLUMN_CHANGE_DATE, stageDate);
+            values.put(CauseEntry.COLUMN_COMMENT, comments);
+            values.put(CauseEntry.COLUMN_ATTORNEY_KEY, attorneyId);
+            values.put(CauseEntry.COLUMN_COURT_KEY, courtId);
 
 
-        mContext.getContentResolver().insert(
-                CauseEntry.CONTENT_URI,
-                values
-        );
+            mContext.getContentResolver().insert(
+                    CauseEntry.CONTENT_URI,
+                    values
+            );
+        }
 
     }
 
     @Override
     public boolean exists(Context ctx) {
-        if(status.equals("Terminado"))
-                return false;
-        Cursor cursor = ctx.getContentResolver().query(
-                CauseEntry.CONTENT_URI,
-                null,
-                CauseEntry.COLUMN_CAUSE_ID+"= ?",
-                new String[]{""+accountId},
-                null
-        );
-        boolean result = cursor.moveToFirst();
-        cursor.close();
-        return result;
+        if(status.equals("Vigente")) {
+            Cursor cursor = ctx.getContentResolver().query(
+                    CauseEntry.CONTENT_URI,
+                    null,
+                    CauseEntry.COLUMN_CAUSE_ID + "= ?",
+                    new String[]{"" + accountId},
+                    null
+            );
+            boolean result = cursor.moveToFirst();
+            cursor.close();
+            return result;
+        }
+        else
+            return false;
     }
 }
