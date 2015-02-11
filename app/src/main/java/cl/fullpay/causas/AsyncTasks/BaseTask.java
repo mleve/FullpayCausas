@@ -111,7 +111,6 @@ public abstract class BaseTask extends AsyncTask<Void, Void, Boolean> {
     }
 
     protected int getResponseCode(String rawResponse){
-        //TODO relogear si responseCode = 23
         try {
             JSONObject response = new JSONObject(rawResponse);
             int responseCode = response.getInt("response");
