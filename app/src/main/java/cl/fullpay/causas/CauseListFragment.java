@@ -15,10 +15,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import cl.fullpay.causas.adapters.CauseCursorAdapter;
 import cl.fullpay.causas.data.FullpayContract;
 import cl.fullpay.causas.data.FullpayContract.CauseEntry;
+import cl.fullpay.causas.data.FullpayDbHelper;
 
 
 /**
@@ -36,6 +38,7 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
     private String courtName;
     private String query;
     private boolean isSearch= false;
+    private int lastNameOrdered=0;
 
     public CauseListFragment() {
         // Required empty public constructor
@@ -73,10 +76,70 @@ public class CauseListFragment extends Fragment implements LoaderManager.LoaderC
         ListView causeList = (ListView) rootView.findViewById(R.id.listview_cause);
         causeList.setAdapter(causesAdapter);
 
+        rootView.findViewById(R.id.cause_name).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sortByName(view);
+            }
+        });
 
         return rootView;
 
 
+    }
+
+    private void sortByName(View view) {
+        TextView tw = (TextView) view;
+        String text = "Nombre";
+        String sortOrder;
+        if(lastNameOrdered == 0 || lastNameOrdered ==-1){
+            tw.setText(text+" (A)");
+            sortOrder = " ASC";
+            lastNameOrdered = 1;
+        }
+        else{
+            tw.setText(text+" (D)");
+            sortOrder = " DESC";
+            lastNameOrdered = -1;
+        }
+        Uri causesUri = FullpayContract.CauseEntry.CONTENT_URI;
+
+        Cursor courtCursor = getActivity().getContentResolver().query(
+                FullpayContract.CourtEntry.CONTENT_URI,
+                null,
+                FullpayContract.CourtEntry.COLUMN_NAME+"= ? ",
+                new String[]{courtName},
+                null
+        );
+        courtCursor.moveToFirst();
+        String courtId = courtCursor.getString(
+                courtCursor.getColumnIndex(FullpayContract.CourtEntry._ID)
+        );
+        //Log.d(LOG_TAG,"court name : "+courtName+", court id: "+courtId);
+        courtCursor.close();
+        Cursor cursor;
+
+        if (isSearch){
+            cursor = getActivity().getContentResolver().query(
+                    causesUri,
+                    null,
+                    CauseEntry.COLUMN_COURT_KEY+"=? AND "+
+                            CauseEntry.COLUMN_ROL_NUM+" LIKE '"+query+"%'",
+                    new String[]{courtId},
+                    CauseEntry.COLUMN_LAST_NAME.concat(sortOrder)
+            );
+        }
+        else{
+            cursor = getActivity().getContentResolver().query(
+                    causesUri,
+                    null,
+                    CauseEntry.COLUMN_COURT_KEY+"= ?",
+                    new String[]{courtId},
+                    CauseEntry.COLUMN_LAST_NAME.concat(sortOrder)
+            );
+        }
+
+        causesAdapter.changeCursor(cursor);
     }
 
     @Override

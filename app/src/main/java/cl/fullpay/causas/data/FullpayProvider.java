@@ -205,7 +205,20 @@ public class FullpayProvider extends ContentProvider{
 
     @Override
     public int delete(Uri uri, String s, String[] strings) {
-        return 0;
+        int result;
+        switch (sUriMatcher.match(uri)){
+            case CAUSE:{
+                result = mOpenHelper.getWritableDatabase().delete(
+                        CauseEntry.TABLE_NAME,
+                        s,
+                        strings
+                );
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("unknown uri: "+uri);
+        }
+        return result;
     }
 
     @Override

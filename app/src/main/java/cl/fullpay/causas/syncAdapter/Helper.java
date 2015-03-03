@@ -193,7 +193,7 @@ public class Helper {
 
     protected boolean logInUser(String baseUrl, ArrayList<NameValuePair> mParams){
         String responseStr = httpGetRequest(baseUrl +"/auth",mParams);
-        //Log.d(LOG_TAG,"respuesta autenticacion: "+responseStr);
+        Log.d(LOG_TAG,"respuesta autenticacion: "+responseStr);
 
         int responseCode = getResponseCode(responseStr);
 
@@ -207,13 +207,13 @@ public class Helper {
             return false;
 
         //obtener token de sesion
-        //Log.d(LOG_TAG,"intentando obtener token de sesion");
+        Log.d(LOG_TAG,"intentando obtener token de sesion");
 
         responseStr = httpGetRequest(baseUrl +"/getAuthSession/"+userToken,null);
 
 
         String auth_session = getSessionToken(responseStr);
-        //Log.d(LOG_TAG,"token de session: "+auth_session);
+        Log.d(LOG_TAG,"token de session: "+auth_session);
         if(auth_session == null)
             return false;
 
@@ -269,7 +269,7 @@ public class Helper {
 
         String responseStr = null;
 
-        //Log.d(LOG_TAG, "Intentando http a "+mUrl);
+        Log.d(LOG_TAG, "Intentando http a "+mUrl);
         //Autentificar
         try {
 
@@ -404,12 +404,12 @@ public class Helper {
         params.add(new BasicNameValuePair("fecha_etapa",formatDate));
         params.add(new BasicNameValuePair("observaciones",comments));
 
-        /*Log.d(LOG_TAG,
+        Log.d(LOG_TAG,
                 String.format("Se envian a guardar: id_cuenta: %s , id_etapa %s , fecha_etapa: %s , observaciones: %s ",
                         idCause,idStage,formatDate,comments)
             );
 
-            */
+
 
         String baseUrl = mContext.getString(R.string.api_base_url);
         String responseStr = httpGetRequest(baseUrl+"/insertCausa/"+token,params);

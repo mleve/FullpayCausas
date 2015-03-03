@@ -164,6 +164,26 @@ public class Cause implements ParserInterface {
                     values
             );
         }
+        else{
+            //Si existe la causa con otro estado en la DB local, borrarla
+            // ( Ya no es util en la app movil
+            Cursor cursor = mContext.getContentResolver().query(
+                    CauseEntry.CONTENT_URI,
+                    null,
+                    CauseEntry.COLUMN_CAUSE_ID + "= ?",
+                    new String[]{"" + accountId},
+                    null
+            );
+            boolean result = cursor.moveToFirst();
+            cursor.close();
+            if(result){
+                mContext.getContentResolver().delete(
+                        CauseEntry.CONTENT_URI,
+                        CauseEntry.COLUMN_CAUSE_ID+"= ?",
+                        new String[]{""+accountId}
+                );
+            }
+        }
 
     }
 
